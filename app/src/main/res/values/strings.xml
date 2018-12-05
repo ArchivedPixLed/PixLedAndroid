@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">LightRoom</string>
+    <string name="light">Light</string>
+    <string name="noise">Noise</string>
+    <string name="ok">Check</string>
+    <string name="enter_room">Enter Room :</string>
+    <string name="lightonoff">Light ON/OFF</string>
+    <string name="ringonoff">Light ON/OFF</string>
+    <string name="image_content_description">Light Status</string>
+</resources>
