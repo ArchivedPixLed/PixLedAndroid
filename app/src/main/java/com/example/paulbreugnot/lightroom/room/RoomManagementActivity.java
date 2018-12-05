@@ -1,4 +1,4 @@
-package com.example.paulbreugnot.lightroom;
+package com.example.paulbreugnot.lightroom.room;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,11 +8,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
+import com.example.paulbreugnot.lightroom.R;
 // import android.view.Menu;
 
-public class ContextManagementActivity extends Activity {
+public class RoomManagementActivity extends Activity {
 
     private String room;
     private RoomContextState state;
@@ -22,7 +21,7 @@ public class ContextManagementActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        roomContextHttpManager = new RoomContextHttpManager(this);
+        // roomContextHttpManager = new RoomContextHttpManager(this);
 
         setContentView(R.layout.activity_context_management);
         // initTextFieldListener();
@@ -32,24 +31,23 @@ public class ContextManagementActivity extends Activity {
         this.state = state;
     }
 
-//    private void initTextFieldListener() {
-//        ((Button) findViewById(R.id.buttonCheck)).setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                room = ((EditText) findViewById(R.id.editText1))
-//                        .getText().toString();
-//                roomContextHttpManager.retrieveRoomContextState(room);
-//            }
-//        });
-//
-//    }
+    private void initTextFieldListener() {
+        ((Button) findViewById(R.id.buttonCheck)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                room = ((EditText) findViewById(R.id.editText1))
+                        .getText().toString();
+                roomContextHttpManager.retrieveRoomContextState(room);
+            }
+        });
+    }
 
     public void updateContextView() {
         if (this.state != null) {
             // contextView.setVisibility(View.VISIBLE);
             ((TextView) findViewById(R.id.textViewLightValue)).setText(Integer
                     .toString(state.getLight()));
-            ((TextView) findViewById(R.id.textViewNoiseValue)).setText(Float
-                    .toString(state.getNoise()));
+//            ((TextView) findViewById(R.id.textViewNoiseValue)).setText(Float
+//                    .toString(state.getNoise()));
 
             ImageView image = findViewById(R.id.imageView1);
 

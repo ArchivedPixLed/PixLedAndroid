@@ -1,6 +1,5 @@
-package com.example.paulbreugnot.lightroom;
+package com.example.paulbreugnot.lightroom.room;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -19,9 +18,9 @@ public class RoomContextHttpManager {
     private static final String CONTEXT_SERVER_URL = "http://192.168.12.1:8083/";
 
     RequestQueue requestQueue;
-    ContextManagementActivity contextManagementActivity;
+    RoomManagementActivity contextManagementActivity;
 
-    public RoomContextHttpManager(ContextManagementActivity contextManagementActivity) {
+    public RoomContextHttpManager(RoomManagementActivity contextManagementActivity) {
         requestQueue = Volley.newRequestQueue(contextManagementActivity);
         this.contextManagementActivity = contextManagementActivity;
     }

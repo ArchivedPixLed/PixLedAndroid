@@ -1,4 +1,4 @@
-package com.example.paulbreugnot.lightroom;
+package com.example.paulbreugnot.lightroom.room;
 
 public class RoomContextState {
 

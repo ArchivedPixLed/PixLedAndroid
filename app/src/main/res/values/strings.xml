@@ -7,4 +7,7 @@
     <string name="lightonoff">Light ON/OFF</string>
     <string name="ringonoff">Light ON/OFF</string>
     <string name="image_content_description">Light Status</string>
+    <string name="welcome">Welcome to LightRoom!</string>
+    <string name="welcome_button">Start now!</string>
+    <string name="select_building">Select a building :</string>
 </resources>
