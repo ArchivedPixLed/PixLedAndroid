@@ -26,7 +26,6 @@ public class BuildingAdapter extends RecyclerView.Adapter<BuildingViewHolder> {
         return new BuildingViewHolder(view);
     }
 
-    //c'est ici que nous allons remplir notre cellule avec le texte/image de chaque MyObjects
     @Override
     public void onBindViewHolder(BuildingViewHolder buildingViewHolder, int position) {
         Building building = list.get(position);

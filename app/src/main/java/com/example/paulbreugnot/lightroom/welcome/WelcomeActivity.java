@@ -13,6 +13,7 @@ public class WelcomeActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle(R.string.welcome);
 
         setContentView(R.layout.welcome);
 
