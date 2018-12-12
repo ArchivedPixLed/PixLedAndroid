@@ -11,11 +11,13 @@ import java.util.List;
 
 public class BuildingAdapter extends RecyclerView.Adapter<BuildingViewHolder> {
 
+    BuildingSelectionActivity buildingSelectionActivity;
     List<Building> list;
 
     //ajouter un constructeur prenant en entrée une liste
-    public BuildingAdapter(List<Building> list) {
+    public BuildingAdapter(List<Building> list, BuildingSelectionActivity buildingSelectionActivity) {
         this.list = list;
+        this.buildingSelectionActivity = buildingSelectionActivity;
     }
 
     //cette fonction permet de créer les viewHolder
@@ -29,7 +31,7 @@ public class BuildingAdapter extends RecyclerView.Adapter<BuildingViewHolder> {
     @Override
     public void onBindViewHolder(BuildingViewHolder buildingViewHolder, int position) {
         Building building = list.get(position);
-        buildingViewHolder.bind(building);
+        buildingViewHolder.bind(building, buildingSelectionActivity);
     }
 
     @Override

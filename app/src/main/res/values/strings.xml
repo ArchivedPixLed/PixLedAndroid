@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LightRoom</string>
+    <string name="app_name">PixLed Strip</string>
     <string name="light">Light</string>
     <string name="noise">Noise</string>
     <string name="ok">Check</string>

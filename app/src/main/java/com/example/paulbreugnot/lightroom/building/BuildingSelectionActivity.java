@@ -1,6 +1,7 @@
 package com.example.paulbreugnot.lightroom.building;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.example.paulbreugnot.lightroom.R;
+import com.example.paulbreugnot.lightroom.room.RoomSelectionActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class BuildingSelectionActivity extends Activity {
 
+    public static final String EXTRA_BUILDING_ID = "com.example.paulbreugnot.lightroom.building.EXTRA_BUILDING_ID";
+    public static final String EXTRA_BUILDING_NAME = "com.example.paulbreugnot.lightroom.building.EXTRA_BUILDING_NAME";
+
     private RecyclerView recyclerView;
     private BuildingAdapter buildingAdapter;
 
@@ -31,24 +36,16 @@ public class BuildingSelectionActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(R.string.select_building);
-        // roomContextHttpManager = new RoomContextHttpManager(this);
 
         setContentView(R.layout.building_select);
-        // initTextFieldListener();
 
         feedBuildings();
 
         recyclerView = findViewById(R.id.buildingList);
 
-        //définit l'agencement des cellules, ici de façon verticale, comme une ListView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        //pour adapter en grille comme une RecyclerView, avec 2 cellules par ligne
-        //recyclerView.setLayoutManager(new GridLayoutManager(this,2));
-
-        //puis créer un MyAdapter, lui fournir notre liste de villes.
-        //cet adapter servira à remplir notre recyclerview
-        buildingAdapter = new BuildingAdapter(buildings);
+        buildingAdapter = new BuildingAdapter(buildings, this);
         recyclerView.setAdapter(buildingAdapter);
     }
 
@@ -65,7 +62,7 @@ public class BuildingSelectionActivity extends Activity {
     }
 
     private void feedBuildings() {
-//        for (int i = 0; i < 20; i++) {
+//        for (int i = 0; i < 2; i++) {
 //            buildings.add(new Building(i, "Building " + i));
 //        }
         BuildingService buildingService = new Retrofit.Builder()
@@ -93,5 +90,14 @@ public class BuildingSelectionActivity extends Activity {
                 Log.e("RETROFIT","Retrofit error : " + t);
             }
         });
+    }
+
+
+    protected void launchRoomSelectionActivity(Building building){
+        Intent intent = new Intent(this, RoomSelectionActivity.class);
+        // Add extras
+        intent.putExtra(EXTRA_BUILDING_ID, building.getId());
+        intent.putExtra(EXTRA_BUILDING_NAME, building.getName());
+        startActivity(intent);
     }
 }
