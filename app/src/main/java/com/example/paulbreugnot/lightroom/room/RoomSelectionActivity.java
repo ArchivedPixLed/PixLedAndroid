@@ -8,11 +8,14 @@ import android.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.building.Building;
 import com.example.paulbreugnot.lightroom.building.BuildingSelectionActivity;
 import com.example.paulbreugnot.lightroom.building.BuildingService;
+import com.example.paulbreugnot.lightroom.light.ChangeColorActivity;
+import com.example.paulbreugnot.lightroom.light.Light;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +66,7 @@ public class RoomSelectionActivity extends FragmentActivity {
 
         // Instantiate a ViewPager and a PagerAdapter.
         mPager = findViewById(R.id.room_pager);
-        mPagerAdapter = new RoomPagerAdapter(getSupportFragmentManager());
+        mPagerAdapter = new RoomPagerAdapter(getSupportFragmentManager(), rooms);
         mPager.setAdapter(mPagerAdapter);
 
         // Create a tab listener that is called when the user changes tabs.
@@ -74,6 +77,7 @@ public class RoomSelectionActivity extends FragmentActivity {
                 // When the tab is selected, switch to the
                 // corresponding page in the ViewPager.
                 mPager.setCurrentItem(tab.getPosition());
+                // ((TextView) findViewById(R.id.lightNumber)).setText(rooms.get(tab.getPosition()).getName());
             }
 
             @Override
@@ -128,6 +132,7 @@ public class RoomSelectionActivity extends FragmentActivity {
                 for (Room r : listRooms) {
                     Log.i("RETROFIT","Room : " + r.getName());
                     rooms.add(r);
+                    mPagerAdapter.notifyDataSetChanged();
                     actionBar.addTab(
                             actionBar.newTab()
                                     .setText(r.getName())
@@ -142,4 +147,5 @@ public class RoomSelectionActivity extends FragmentActivity {
             }
         });
     }
+
 }

@@ -11,4 +11,10 @@
     <string name="welcome">Welcome to LightRoom!</string>
     <string name="welcome_button">Start now!</string>
     <string name="select_building">Select a building</string>
+    <string name="light_level">Intensity</string>
+    <string name="light_number">Number of lights :</string>
+    <string name="room_switch">Switch Room</string>
+    <string name="color">Color</string>
+    <string name="status">Status</string>
+    <string name="change_light_color">Change Light Color</string>
 </resources>
