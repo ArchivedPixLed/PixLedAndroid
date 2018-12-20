@@ -28,7 +28,6 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name=".light.ChangeColorActivity"/>
     </application>
 
 </manifest>

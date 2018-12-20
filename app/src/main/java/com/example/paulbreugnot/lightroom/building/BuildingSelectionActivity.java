@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.example.paulbreugnot.lightroom.R;
+import com.example.paulbreugnot.lightroom.light.Light;
 import com.example.paulbreugnot.lightroom.room.RoomSelectionActivity;
 
 import java.util.ArrayList;

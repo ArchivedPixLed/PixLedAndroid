@@ -9,7 +9,9 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import java.util.List;
 
 public class RoomPagerAdapter extends FragmentStatePagerAdapter {
-
+    /*
+    Class used to generate the room pages from the rooms list.
+     */
     private List<Room> rooms;
 
     public RoomPagerAdapter(FragmentManager fm, List<Room> rooms) {

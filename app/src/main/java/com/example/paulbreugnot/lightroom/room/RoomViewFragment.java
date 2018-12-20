@@ -1,5 +1,6 @@
 package com.example.paulbreugnot.lightroom.room;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -28,7 +30,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class RoomViewFragment extends Fragment {
-
+    /*
+    This fragment corresponds to a room page.
+     */
     private long roomId;
     private List<Light> lightList = new ArrayList<>();
 
@@ -38,15 +42,24 @@ public class RoomViewFragment extends Fragment {
     private int lightNumber = 0;
     private Switch roomSwitch;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup) inflater.inflate(
                 R.layout.room_page, container, false);
 
+        /*
+        Used to show the number of available rooms at the top of the view.
+         */
         lightNumberTextView = rootView.findViewById(R.id.lightNumber);
         lightNumberTextView.setText("0");
 
+        /*
+        The button to switch a whole room.
+        How this operation is handled depends on the server side, but each light status will be
+        synchronized in any case.
+         */
         roomSwitch = rootView.findViewById(R.id.roomSwitch);
         roomSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,6 +73,7 @@ public class RoomViewFragment extends Fragment {
                 roomService.switchRoom(roomId).enqueue(new Callback<List<Light>>() {
                     @Override
                     public void onResponse(Call<List<Light>> call, Response<List<Light>> response) {
+                        // Synchronize each light status
                         HashMap<Long, Status> newLightStatus = new HashMap<>();
                         for (Light light : response.body()) {
                             newLightStatus.put(light.getId(), light.getStatus());
@@ -73,17 +87,20 @@ public class RoomViewFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<List<Light>> call, Throwable t) {
-
+                        // Canceled operation
+                        roomSwitch.setChecked(!roomSwitch.isChecked());
                     }
                 });
             }
         });
 
+        // Init button status
         roomSwitch.setChecked(getArguments().getString("roomStatus").equals("ON"));
 
+        // Retrieve the id of the room corresponding to this view
         roomId = getArguments().getLong("roomId");
 
-
+        // The recycler view (aka a list) in which lights will be displayed
         RecyclerView recyclerView = rootView.findViewById(R.id.lightList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -91,15 +108,13 @@ public class RoomViewFragment extends Fragment {
         lightAdapter = new LightAdapter(lightList, this);
         recyclerView.setAdapter(lightAdapter);
 
+        // Fetch lights from the server, feeding the recycler view.
         fetchLights();
 
         return rootView;
     }
 
     private void fetchLights() {
-        //        for (int i = 0; i < 2; i++) {
-//            buildings.add(new Building(i, "Building " + i));
-//        }
         RoomService buildingService = new Retrofit.Builder()
                 .baseUrl(RoomService.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -116,7 +131,10 @@ public class RoomViewFragment extends Fragment {
                 for (Light l : list) {
                     Log.i("RETROFIT","Light : " + l.getId());
                     lightList.add(l);
+                    // Update the recycler view
                     lightAdapter.notifyItemInserted(lightList.size() - 1);
+
+                    // Update light number
                     lightNumber++;
                     lightNumberTextView.setText((new Long(lightNumber)).toString());
                 }
@@ -130,6 +148,12 @@ public class RoomViewFragment extends Fragment {
     }
 
     public void updateRoomStatus() {
+        /*
+        Used when room are switched, to keep room status synchronized.
+        For example when all lights are switched off, the room status must be set to off.
+        Notice that room status is kept consistent from the server side, this function just
+        fetch each time the room status to keep it synchonized.
+        */
         RoomService roomService = new Retrofit.Builder()
                 .baseUrl(RoomService.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -148,4 +172,5 @@ public class RoomViewFragment extends Fragment {
             }
         });
     }
+
 }

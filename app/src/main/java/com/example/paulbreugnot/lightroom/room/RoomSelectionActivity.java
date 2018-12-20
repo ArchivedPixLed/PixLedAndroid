@@ -8,13 +8,12 @@ import android.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.Button;
 
 import com.example.paulbreugnot.lightroom.R;
-import com.example.paulbreugnot.lightroom.building.Building;
 import com.example.paulbreugnot.lightroom.building.BuildingSelectionActivity;
 import com.example.paulbreugnot.lightroom.building.BuildingService;
-import com.example.paulbreugnot.lightroom.light.ChangeColorActivity;
 import com.example.paulbreugnot.lightroom.light.Light;
 
 import java.util.ArrayList;
@@ -30,44 +29,54 @@ public class RoomSelectionActivity extends FragmentActivity {
 
     private static final String LOG_TAG = "SELECT_ROOM";
 
-    /**
-     * The pager widget, which handles animation and allows swiping horizontally to access previous
-     * and next wizard steps.
+    /*
+    Pager setup
      */
-    private ViewPager mPager;
-
-    /**
-     * The pager adapter, which provides the pages to the view pager widget.
-     */
-    private PagerAdapter mPagerAdapter;
+    private ViewPager roomPager;
+    private PagerAdapter roomPagerAdapter;
 
     private ActionBar.TabListener tabListener;
 
     private long buildingId;
+    private String buildingName;
     private List<Room> rooms = new ArrayList<>();
+
+    /*
+    Change color setup
+     */
+    private View changeColor;
+    private Button OkButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        final ActionBar actionBar = getActionBar();
+        super.onCreate(savedInstanceState);
 
+        // Action bar that is shown on top of the app
+        final ActionBar actionBar = getActionBar();
 
         // Specify that tabs should be displayed in the action bar.
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        super.onCreate(savedInstanceState);
+        // Retrieves Building informations from the original BuildingSelectionActivity
         Intent intent = getIntent();
         buildingId = intent.getLongExtra(BuildingSelectionActivity.EXTRA_BUILDING_ID, 0L);
-        String buildingName = intent.getStringExtra(BuildingSelectionActivity.EXTRA_BUILDING_NAME);
+        buildingName = intent.getStringExtra(BuildingSelectionActivity.EXTRA_BUILDING_NAME);
         Log.i(LOG_TAG, "Building id : " + buildingId);
         Log.i(LOG_TAG, "Building name : " + buildingName);
 
+        // Set up main view
         setTitle(buildingName);
         setContentView(R.layout.room_pager);
 
+        // To show pages (aka rooms) as tabs
+        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+
         // Instantiate a ViewPager and a PagerAdapter.
-        mPager = findViewById(R.id.room_pager);
-        mPagerAdapter = new RoomPagerAdapter(getSupportFragmentManager(), rooms);
-        mPager.setAdapter(mPagerAdapter);
+        roomPager = findViewById(R.id.room_pager);
+        roomPagerAdapter = new RoomPagerAdapter(getSupportFragmentManager(), rooms);
+        roomPager.setAdapter(roomPagerAdapter);
+        getActionBar().show();
 
         // Create a tab listener that is called when the user changes tabs.
         tabListener = new ActionBar.TabListener() {
@@ -76,8 +85,7 @@ public class RoomSelectionActivity extends FragmentActivity {
             public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
                 // When the tab is selected, switch to the
                 // corresponding page in the ViewPager.
-                mPager.setCurrentItem(tab.getPosition());
-                // ((TextView) findViewById(R.id.lightNumber)).setText(rooms.get(tab.getPosition()).getName());
+                roomPager.setCurrentItem(tab.getPosition());
             }
 
             @Override
@@ -90,7 +98,7 @@ public class RoomSelectionActivity extends FragmentActivity {
 
         };
 
-        mPager.addOnPageChangeListener(
+        roomPager.addOnPageChangeListener(
                 new ViewPager.SimpleOnPageChangeListener() {
                     @Override
                     public void onPageSelected(int position) {
@@ -100,21 +108,23 @@ public class RoomSelectionActivity extends FragmentActivity {
                     }
                 });
 
-        fetchRooms();
+        /*
+        Set up change color
+         */
+        changeColor = findViewById(R.id.change_color);
+        OkButton = findViewById(R.id.validate_color);
+        OkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showRooms();
+            }
+        });
 
-//        for(int i = 0; i < 12; i++) {
-//            actionBar.addTab(
-//                    actionBar.newTab()
-//                            .setText("Tab " + (i + 1))
-//                            .setTabListener(tabListener));
-//
-//        }
+        fetchRooms();
     }
 
     private void fetchRooms() {
-//        for (int i = 0; i < 2; i++) {
-//            rooms.add(new Room(i, "Room " + i, 0, -12));
-//        }
+        // Fetch available rooms for the given building from the server
         BuildingService buildingService = new Retrofit.Builder()
                 .baseUrl(BuildingService.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -132,7 +142,7 @@ public class RoomSelectionActivity extends FragmentActivity {
                 for (Room r : listRooms) {
                     Log.i("RETROFIT","Room : " + r.getName());
                     rooms.add(r);
-                    mPagerAdapter.notifyDataSetChanged();
+                    roomPagerAdapter.notifyDataSetChanged();
                     actionBar.addTab(
                             actionBar.newTab()
                                     .setText(r.getName())
@@ -148,4 +158,17 @@ public class RoomSelectionActivity extends FragmentActivity {
         });
     }
 
+    public void showChangeColor(Light light) {
+        // Hide the pager view, show the color change view (called from "changeColor buttons" in
+        // LightViewHolders.
+        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        roomPager.setVisibility(View.GONE);
+        changeColor.setVisibility(View.VISIBLE);
+    }
+
+    public void showRooms() {
+        // Hide the change color view, show the pager view
+        changeColor.setVisibility(View.GONE);
+        roomPager.setVisibility(View.VISIBLE);
+    }
 }

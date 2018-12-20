@@ -14,19 +14,24 @@ import java.util.List;
 
 public class LightAdapter extends RecyclerView.Adapter<LightViewHolder> {
 
+    /*
+    This class is used to generate views corresponding to each light in the RecyclerView, from a
+    list of lights.
+     */
+
     private List<Light> lightList;
     private List<LightViewHolder> lightViews;
     private RoomViewFragment roomViewFragment;
 
-    //ajouter un constructeur prenant en entrée une liste
     public LightAdapter(List<Light> lightList, RoomViewFragment roomViewFragment) {
         this.lightList = lightList;
         lightViews = new ArrayList<>();
         this.roomViewFragment = roomViewFragment;
     }
 
-    //cette fonction permet de créer les viewHolder
-    //et par la même indiquer la vue à inflater (à partir des layout xml)
+    /*
+    Automatically called to generated each light view from the light list.
+     */
     @Override
     public LightViewHolder onCreateViewHolder(ViewGroup viewGroup, int itemType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.light_card_view,viewGroup,false);
@@ -35,9 +40,11 @@ public class LightAdapter extends RecyclerView.Adapter<LightViewHolder> {
         return newLightView;
     }
 
+    /*
+    Bind each list item with the corresponding view.
+     */
     @Override
     public void onBindViewHolder(LightViewHolder lightViewHolder, int position) {
-        Log.i("LIGHT_ADAPTER", "Binding view holder.");
         Light light = lightList.get(position);
         lightViewHolder.bind(light);
     }

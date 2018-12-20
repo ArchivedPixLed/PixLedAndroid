@@ -9,6 +9,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.example.paulbreugnot.lightroom.R;
+import com.example.paulbreugnot.lightroom.room.RoomSelectionActivity;
 import com.example.paulbreugnot.lightroom.room.RoomViewFragment;
 import com.example.paulbreugnot.lightroom.utils.Status;
 
@@ -20,19 +21,22 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class LightViewHolder extends RecyclerView.ViewHolder {
 
+    /*
+    Controller for lights views (views that are displayed for each light in the RecyclerView)
+     */
     private Light light;
 
     private TextView lightId;
     private Switch lightSwitch;
-
-    private RoomViewFragment roomViewFragment;
+    private Button changeColorButton;
 
     public LightViewHolder(final View itemView, final RoomViewFragment roomViewFragment) {
         super(itemView);
 
-        this.roomViewFragment = roomViewFragment;
-
+        // Light id view
         lightId = itemView.findViewById(R.id.lightId);
+
+        // Button used to switch light
         lightSwitch = itemView.findViewById(R.id.lightSwitch);
         lightSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +51,7 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
                     @Override
                     public void onResponse(Call<Light> call, Response<Light> response) {
                         light.switchLight();
+                        // Update room status according to the current lights setup
                         roomViewFragment.updateRoomStatus();
                     }
 
@@ -59,30 +64,28 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
                 );
             }
         });
-        Button changeColorButton = itemView.findViewById(R.id.change_color_button);
+
+        // Initiate the color selection view
+        changeColorButton = itemView.findViewById(R.id.change_color_button);
         changeColorButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                launchChangeColorActivity(light);
+                ((RoomSelectionActivity) roomViewFragment.getActivity()).showChangeColor(light);
             }
         });
 
     }
 
-    //puis ajouter une fonction pour remplir la cellule en fonction d'un MyObject
     public void bind(Light light){
+        // Used to synchronized the view with informations contained in the corresponding
+        // Light instance.
         this.light = light;
         lightId.setText((Long.valueOf(light.getId())).toString());
         lightSwitch.setChecked(light.getStatus() == Status.ON);
-        // Picasso.with(imageView.getContext()).load(myObject.getImageUrl()).centerCrop().fit().into(imageView);
+        changeColorButton.setBackgroundColor(light.getColor());
     }
 
     public Light getLight() {
         return light;
-    }
-
-    protected void launchChangeColorActivity(Light light){
-        Intent intent = new Intent(roomViewFragment.getContext(), ChangeColorActivity.class);
-        roomViewFragment.getActivity().startActivity(intent);
     }
 }

@@ -9,7 +9,8 @@ public class Building {
     private String name;
 
     @JsonCreator
-    public Building(@JsonProperty("id") long id,@JsonProperty("name") String name) {
+    public Building(@JsonProperty("id") long id,
+                    @JsonProperty("name") String name) {
         this.id = id;
         this.name = name;
     }
