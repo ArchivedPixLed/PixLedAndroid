@@ -23,10 +23,13 @@ public class LightAdapter extends RecyclerView.Adapter<LightViewHolder> {
     private List<LightViewHolder> lightViews;
     private RoomViewFragment roomViewFragment;
 
-    public LightAdapter(List<Light> lightList, RoomViewFragment roomViewFragment) {
+    private boolean enableColorButton;
+
+    public LightAdapter(List<Light> lightList, RoomViewFragment roomViewFragment, boolean enableColorButton) {
         this.lightList = lightList;
         lightViews = new ArrayList<>();
         this.roomViewFragment = roomViewFragment;
+        this.enableColorButton = enableColorButton;
     }
 
     /*
@@ -35,7 +38,7 @@ public class LightAdapter extends RecyclerView.Adapter<LightViewHolder> {
     @Override
     public LightViewHolder onCreateViewHolder(ViewGroup viewGroup, int itemType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.light_card_view,viewGroup,false);
-        LightViewHolder newLightView = new LightViewHolder(view, roomViewFragment);
+        LightViewHolder newLightView = new LightViewHolder(view, roomViewFragment, enableColorButton);
         lightViews.add(newLightView);
         return newLightView;
     }

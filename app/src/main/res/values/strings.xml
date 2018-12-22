@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PixLed Strip</string>
+    <string name="app_name">PixLed</string>
     <string name="light">Light</string>
     <string name="noise">Noise</string>
     <string name="ok">Check</string>
@@ -8,7 +8,7 @@
     <string name="ringonoff">Light ON/OFF</string>
     <string name="image_content_description">Light Status</string>
     <string name="delete_button_description">Delete Button</string>
-    <string name="welcome">Welcome to LightRoom!</string>
+    <string name="welcome">Welcome to PixLed App!</string>
     <string name="welcome_button">Start now!</string>
     <string name="select_building">Select a building</string>
     <string name="light_level">Intensity</string>

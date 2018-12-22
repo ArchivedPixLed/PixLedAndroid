@@ -1,7 +1,5 @@
 package com.example.paulbreugnot.lightroom.light;
 
-import android.graphics.Color;
-
 import com.example.paulbreugnot.lightroom.utils.Status;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,16 +9,19 @@ public class Light {
     private long id;
     private int level;
     private Status status;
-    private int color = Color.GREEN;
+    private int color;
     private long roomId;
+
     @JsonCreator
     public Light(@JsonProperty("id") long id,
                 @JsonProperty("level") int level,
                 @JsonProperty("status") String status,
+                @JsonProperty("color") int color,
                 @JsonProperty("roomId") long roomId) {
         this.id = id;
         this.level = level;
         this.status = status.equals("ON") ? Status.ON : Status.OFF;
+        this.color = color;
         this.roomId = roomId;
     }
 

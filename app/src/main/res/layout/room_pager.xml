@@ -21,7 +21,12 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="invisible">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/selected_light_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <com.flask.colorpicker.ColorPickerView
             android:id="@+id/color_picker_view"
@@ -30,11 +35,11 @@
             app:alphaSlider="false"
             app:density="12"
             app:lightnessSlider="true"
-            app:lightnessSliderView="@+id/v_lightness_slider"
+            app:lightnessSliderView="@+id/lightness_slider"
             app:wheelType="FLOWER" />
 
         <com.flask.colorpicker.slider.LightnessSlider
-            android:id="@+id/v_lightness_slider"
+            android:id="@+id/lightness_slider"
             android:layout_width="match_parent"
             android:layout_height="40dp" />
 

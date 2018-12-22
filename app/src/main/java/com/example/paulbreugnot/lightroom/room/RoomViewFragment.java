@@ -105,7 +105,7 @@ public class RoomViewFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        lightAdapter = new LightAdapter(lightList, this);
+        lightAdapter = new LightAdapter(lightList, this, true);
         recyclerView.setAdapter(lightAdapter);
 
         // Fetch lights from the server, feeding the recycler view.
@@ -171,6 +171,10 @@ public class RoomViewFragment extends Fragment {
 
             }
         });
+    }
+
+    public LightAdapter getLightAdapter() {
+        return lightAdapter;
     }
 
 }

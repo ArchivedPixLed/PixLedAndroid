@@ -30,8 +30,14 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
     private Switch lightSwitch;
     private Button changeColorButton;
 
-    public LightViewHolder(final View itemView, final RoomViewFragment roomViewFragment) {
+    private RoomViewFragment roomViewFragment;
+
+    public LightViewHolder(final View itemView,
+                           final RoomViewFragment roomViewFragment,
+                           boolean enableColorButton) {
         super(itemView);
+
+        this.roomViewFragment = roomViewFragment;
 
         // Light id view
         lightId = itemView.findViewById(R.id.lightId);
@@ -67,12 +73,16 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
 
         // Initiate the color selection view
         changeColorButton = itemView.findViewById(R.id.change_color_button);
-        changeColorButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                ((RoomSelectionActivity) roomViewFragment.getActivity()).showChangeColor(light);
-            }
-        });
+        final LightViewHolder thisLightViewHolder = this;
+        if (enableColorButton) {
+            changeColorButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((RoomSelectionActivity) roomViewFragment.getActivity())
+                            .showChangeColor(light, thisLightViewHolder);
+                }
+            });
+        }
 
     }
 
@@ -85,7 +95,15 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
         changeColorButton.setBackgroundColor(light.getColor());
     }
 
+    public Button getChangeColorButton() {
+        return changeColorButton;
+    }
+
     public Light getLight() {
         return light;
+    }
+
+    public RoomViewFragment getRoomViewFragment() {
+        return roomViewFragment;
     }
 }

@@ -2,11 +2,14 @@ package com.example.paulbreugnot.lightroom.room;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.app.FragmentTransaction;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +18,13 @@ import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.building.BuildingSelectionActivity;
 import com.example.paulbreugnot.lightroom.building.BuildingService;
 import com.example.paulbreugnot.lightroom.light.Light;
+import com.example.paulbreugnot.lightroom.light.LightAdapter;
+import com.example.paulbreugnot.lightroom.light.LightService;
+import com.example.paulbreugnot.lightroom.light.LightViewHolder;
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorChangedListener;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.slider.LightnessSlider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +34,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RoomSelectionActivity extends FragmentActivity {
 
@@ -45,7 +56,14 @@ public class RoomSelectionActivity extends FragmentActivity {
     Change color setup
      */
     private View changeColor;
+    private ColorPickerView colorPicker;
+    private LightnessSlider lightnessSlider;
     private Button OkButton;
+    private Light selectedLight;
+    private LightViewHolder selectedLightViewHolder;
+
+    // The adapter of RecyclerView displayed above the color picker
+    private LightAdapter colorChangeLightAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -112,6 +130,17 @@ public class RoomSelectionActivity extends FragmentActivity {
         Set up change color
          */
         changeColor = findViewById(R.id.change_color);
+        colorPicker = findViewById(R.id.color_picker_view);
+        colorPicker.addOnColorChangedListener(new OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int color) {
+                selectedLight.setColor(color);
+                selectedLightViewHolder.getChangeColorButton().setBackgroundColor(color);
+            }
+        });
+        lightnessSlider = findViewById(R.id.lightness_slider);
+        colorPicker.setLightnessSlider(lightnessSlider);
+        lightnessSlider.setColorPicker(colorPicker);
         OkButton = findViewById(R.id.validate_color);
         OkButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,7 +149,40 @@ public class RoomSelectionActivity extends FragmentActivity {
             }
         });
 
+        final LightService lightService = new Retrofit.Builder()
+                .baseUrl(LightService.ENDPOINT)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build()
+                .create(LightService.class);
+
+        colorPicker.addOnColorChangedListener(new OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int color) {
+                Log.i("COLOR PICKER", "Color changed : " + Integer.toString(color));
+                lightService.changeLightColor(selectedLight.getId(),
+                        "text/plain;charset=UTF-8",
+                        Integer.toString(color))
+                        .enqueue(new Callback<Light>() {
+                            @Override
+                            public void onResponse(Call<Light> call, Response<Light> response) {
+                                Log.i("COLOR PICKER", "Change color request OK");
+                            }
+
+                            @Override
+                            public void onFailure(Call<Light> call, Throwable t) {
+                                Log.i("COLOR PICKER", "Change color request failed." + t);
+                            }
+                        });
+                colorChangeLightAdapter.getLightViews().get(0).getChangeColorButton().setBackgroundColor(color);
+
+            }
+        });
+
+
         fetchRooms();
+        // changeColor.setVisibility(View.VISIBLE);
+        // changeColor.setVisibility(View.GONE);
     }
 
     private void fetchRooms() {
@@ -158,17 +220,41 @@ public class RoomSelectionActivity extends FragmentActivity {
         });
     }
 
-    public void showChangeColor(Light light) {
+    public void showChangeColor(Light light, LightViewHolder lightViewHolder) {
         // Hide the pager view, show the color change view (called from "changeColor buttons" in
         // LightViewHolders.
+        selectedLight = light;
+        selectedLightViewHolder = lightViewHolder;
+        // The recycler view (aka a list) in which lights will be displayed
+
+        final RecyclerView recyclerView = findViewById(R.id.selected_light_view);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        List<Light> lightList = new ArrayList<>();
+        lightList.add(light);
+        System.out.println(light == null);
+        colorChangeLightAdapter = new LightAdapter(lightList, lightViewHolder.getRoomViewFragment(), false);
+        recyclerView.setAdapter(colorChangeLightAdapter);
+
         getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        roomPager.setVisibility(View.GONE);
+        roomPager.setVisibility(View.INVISIBLE);
         changeColor.setVisibility(View.VISIBLE);
+
+        colorPicker.setInitialColor(light.getColor(), false);
+        lightnessSlider.setColor(light.getColor());
+        float[] hsv = new float[3];
+        Color.colorToHSV(light.getColor(), hsv);
+        colorPicker.setLightness(hsv[2]);
     }
 
     public void showRooms() {
+        // Synchronized the original light card view with the one that was displayed with the color
+        // picker.
+        selectedLightViewHolder.getRoomViewFragment().getLightAdapter()
+                .notifyItemChanged(selectedLightViewHolder.getAdapterPosition());
         // Hide the change color view, show the pager view
-        changeColor.setVisibility(View.GONE);
+        changeColor.setVisibility(View.INVISIBLE);
         roomPager.setVisibility(View.VISIBLE);
     }
 }
