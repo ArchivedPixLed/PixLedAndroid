@@ -1,5 +1,6 @@
 package com.example.paulbreugnot.lightroom.welcome;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +14,11 @@ public class WelcomeActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(R.string.welcome);
+        // setTitle(R.string.welcome);
+
+
+        ActionBar actionBar = getActionBar();
+        actionBar.hide();
 
         setContentView(R.layout.welcome);
 

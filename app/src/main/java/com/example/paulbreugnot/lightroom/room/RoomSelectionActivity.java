@@ -25,6 +25,7 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorChangedListener;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.slider.LightnessSlider;
+import com.flask.colorpicker.slider.OnValueChangedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,26 +157,17 @@ public class RoomSelectionActivity extends FragmentActivity {
                 .build()
                 .create(LightService.class);
 
-        colorPicker.addOnColorChangedListener(new OnColorChangedListener() {
+        colorPicker.addOnColorSelectedListener(new OnColorSelectedListener() {
             @Override
-            public void onColorChanged(int color) {
-                Log.i("COLOR PICKER", "Color changed : " + Integer.toString(color));
-                lightService.changeLightColor(selectedLight.getId(),
-                        "text/plain;charset=UTF-8",
-                        Integer.toString(color))
-                        .enqueue(new Callback<Light>() {
-                            @Override
-                            public void onResponse(Call<Light> call, Response<Light> response) {
-                                Log.i("COLOR PICKER", "Change color request OK");
-                            }
+            public void onColorSelected(int color) {
+                publishColorChanged(lightService, color);
+            }
+        });
 
-                            @Override
-                            public void onFailure(Call<Light> call, Throwable t) {
-                                Log.i("COLOR PICKER", "Change color request failed." + t);
-                            }
-                        });
-                colorChangeLightAdapter.getLightViews().get(0).getChangeColorButton().setBackgroundColor(color);
-
+        lightnessSlider.setOnValueChangedListener(new OnValueChangedListener() {
+            @Override
+            public void onValueChanged(float v) {
+                publishColorChanged(lightService, colorPicker.getSelectedColor());
             }
         });
 
@@ -220,6 +212,29 @@ public class RoomSelectionActivity extends FragmentActivity {
         });
     }
 
+    private void publishColorChanged(LightService lightService, int color) {
+        Log.i("COLOR PICKER",
+                "Color changed : " + Integer.toString(color) + "(" +
+                        ((color >> 16) & 0xff) + ", " +
+                        ((color >> 8) & 0xff) + ", " +
+                        ((color >> 0) & 0xff) + ")");
+        lightService.changeLightColor(selectedLight.getId(),
+                "text/plain;charset=UTF-8",
+                Integer.toString(color))
+                .enqueue(new Callback<Light>() {
+                    @Override
+                    public void onResponse(Call<Light> call, Response<Light> response) {
+                        Log.i("COLOR PICKER", "Change color request OK");
+                    }
+
+                    @Override
+                    public void onFailure(Call<Light> call, Throwable t) {
+                        Log.i("COLOR PICKER", "Change color request failed." + t);
+                    }
+                });
+        colorChangeLightAdapter.getLightViews().get(0).getChangeColorButton().setBackgroundColor(color);
+    }
+
     public void showChangeColor(Light light, LightViewHolder lightViewHolder) {
         // Hide the pager view, show the color change view (called from "changeColor buttons" in
         // LightViewHolders.
@@ -251,6 +266,7 @@ public class RoomSelectionActivity extends FragmentActivity {
     public void showRooms() {
         // Synchronized the original light card view with the one that was displayed with the color
         // picker.
+        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         selectedLightViewHolder.getRoomViewFragment().getLightAdapter()
                 .notifyItemChanged(selectedLightViewHolder.getAdapterPosition());
         // Hide the change color view, show the pager view
