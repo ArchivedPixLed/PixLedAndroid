@@ -40,7 +40,7 @@ public class BuildingSelectionActivity extends Activity {
 
         setContentView(R.layout.building_select);
 
-        feedBuildings();
+        fetchBuildings();
 
         recyclerView = findViewById(R.id.buildingList);
 
@@ -62,7 +62,7 @@ public class BuildingSelectionActivity extends Activity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void feedBuildings() {
+    private void fetchBuildings() {
 //        for (int i = 0; i < 2; i++) {
 //            buildings.add(new Building(i, "Building " + i));
 //        }

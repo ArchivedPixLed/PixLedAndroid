@@ -1,10 +1,13 @@
 package com.example.paulbreugnot.lightroom.light;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -18,6 +21,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class LightViewHolder extends RecyclerView.ViewHolder {
 
@@ -29,6 +33,8 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
     private TextView lightId;
     private Switch lightSwitch;
     private Button changeColorButton;
+    private TextView connectedTextView;
+    private SeekBar intensitySeekBar;
 
     private RoomViewFragment roomViewFragment;
 
@@ -84,6 +90,34 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
             });
         }
 
+        // Instanciating a light service
+        final LightService lightService = new Retrofit.Builder()
+                .baseUrl(LightService.ENDPOINT)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build()
+                .create(LightService.class);
+
+        // Initiate the intensity slider
+        intensitySeekBar = itemView.findViewById(R.id.intensitySeekBar);
+        intensitySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // set seek bar color
+                light.setValue(((float) progress) / 100);
+                intensitySeekBar.getProgressDrawable().setColorFilter(light.getArgbColor(), PorterDuff.Mode.MULTIPLY);
+                intensitySeekBar.getThumb().setColorFilter(light.getArgbColor(), PorterDuff.Mode.SRC_ATOP);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                RoomSelectionActivity.publishColorChanged(lightService, light);
+            }
+        });
     }
 
     public void bind(Light light){
@@ -92,11 +126,19 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
         this.light = light;
         lightId.setText((Long.valueOf(light.getId())).toString());
         lightSwitch.setChecked(light.getStatus() == Status.ON);
-        changeColorButton.setBackgroundColor(light.getColor());
+        changeColorButton.setBackgroundColor(light.getColorWithMaxValue());
+        int initialColor = light.getArgbColor();
+        intensitySeekBar.getProgressDrawable().setColorFilter(initialColor, PorterDuff.Mode.MULTIPLY);
+        intensitySeekBar.getThumb().setColorFilter(initialColor, PorterDuff.Mode.SRC_ATOP);
+        intensitySeekBar.setProgress((int) (light.getValue() * 100));
     }
 
     public Button getChangeColorButton() {
         return changeColorButton;
+    }
+
+    public SeekBar getIntensitySeekBar() {
+        return intensitySeekBar;
     }
 
     public Light getLight() {

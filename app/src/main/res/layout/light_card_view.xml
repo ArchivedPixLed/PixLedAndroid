@@ -9,7 +9,6 @@
     android:layout_marginTop="10dp"
     android:layout_marginRight="10dp"
     android:layout_marginBottom="5dp"
-    app:cardBackgroundColor="@color/disconnected_background"
     app:contentPadding="10dp">
 
     <LinearLayout
@@ -92,9 +91,11 @@
                     android:textAlignment="center" />
 
                 <SeekBar
-                    android:id="@+id/seekBar"
+                    android:id="@+id/intensitySeekBar"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="100" />
 
             </LinearLayout>
 

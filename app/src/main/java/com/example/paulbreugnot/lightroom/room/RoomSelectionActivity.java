@@ -3,6 +3,7 @@ package com.example.paulbreugnot.lightroom.room;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.app.FragmentTransaction;
@@ -17,15 +18,15 @@ import android.widget.Button;
 import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.building.BuildingSelectionActivity;
 import com.example.paulbreugnot.lightroom.building.BuildingService;
+import com.example.paulbreugnot.lightroom.light.Color2Json;
 import com.example.paulbreugnot.lightroom.light.Light;
 import com.example.paulbreugnot.lightroom.light.LightAdapter;
 import com.example.paulbreugnot.lightroom.light.LightService;
 import com.example.paulbreugnot.lightroom.light.LightViewHolder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorChangedListener;
 import com.flask.colorpicker.OnColorSelectedListener;
-import com.flask.colorpicker.slider.LightnessSlider;
-import com.flask.colorpicker.slider.OnValueChangedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,6 @@ public class RoomSelectionActivity extends FragmentActivity {
      */
     private View changeColor;
     private ColorPickerView colorPicker;
-    private LightnessSlider lightnessSlider;
     private Button OkButton;
     private Light selectedLight;
     private LightViewHolder selectedLightViewHolder;
@@ -135,13 +135,23 @@ public class RoomSelectionActivity extends FragmentActivity {
         colorPicker.addOnColorChangedListener(new OnColorChangedListener() {
             @Override
             public void onColorChanged(int color) {
-                selectedLight.setColor(color);
+                // ONLY SET HUE AND SATURATION !
+                float[] newHsvColor = new float[3];
+                Color.colorToHSV(color, newHsvColor);
+                selectedLight.setHue(newHsvColor[0]);
+                selectedLight.setSaturation(newHsvColor[1]);
+
+                // Update LightCardView contained in the main view
+                selectedLightViewHolder.getIntensitySeekBar().getProgressDrawable().setColorFilter(selectedLight.getArgbColor(), PorterDuff.Mode.MULTIPLY);
+                selectedLightViewHolder.getIntensitySeekBar().getThumb().setColorFilter(selectedLight.getArgbColor(), PorterDuff.Mode.SRC_ATOP);
                 selectedLightViewHolder.getChangeColorButton().setBackgroundColor(color);
+
+                // Update the LightCardView alongside the ColorPicker
+                colorChangeLightAdapter.getLightViews().get(0).getIntensitySeekBar().getProgressDrawable().setColorFilter(selectedLight.getArgbColor(), PorterDuff.Mode.MULTIPLY);
+                colorChangeLightAdapter.getLightViews().get(0).getIntensitySeekBar().getThumb().setColorFilter(selectedLight.getArgbColor(), PorterDuff.Mode.SRC_ATOP);
+                colorChangeLightAdapter.getLightViews().get(0).getChangeColorButton().setBackgroundColor(color);
             }
         });
-        lightnessSlider = findViewById(R.id.lightness_slider);
-        colorPicker.setLightnessSlider(lightnessSlider);
-        lightnessSlider.setColorPicker(colorPicker);
         OkButton = findViewById(R.id.validate_color);
         OkButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,21 +170,13 @@ public class RoomSelectionActivity extends FragmentActivity {
         colorPicker.addOnColorSelectedListener(new OnColorSelectedListener() {
             @Override
             public void onColorSelected(int color) {
-                publishColorChanged(lightService, color);
+                // Publish value
+                // (Value update is done by the OnColorChangeListener)
+                publishColorChanged(lightService, selectedLight);
             }
         });
-
-        lightnessSlider.setOnValueChangedListener(new OnValueChangedListener() {
-            @Override
-            public void onValueChanged(float v) {
-                publishColorChanged(lightService, colorPicker.getSelectedColor());
-            }
-        });
-
 
         fetchRooms();
-        // changeColor.setVisibility(View.VISIBLE);
-        // changeColor.setVisibility(View.GONE);
     }
 
     private void fetchRooms() {
@@ -212,15 +214,21 @@ public class RoomSelectionActivity extends FragmentActivity {
         });
     }
 
-    private void publishColorChanged(LightService lightService, int color) {
+    public static void publishColorChanged(LightService lightService, Light selectedLight) {
+        int color = selectedLight.getArgbColor();
         Log.i("COLOR PICKER",
                 "Color changed : " + Integer.toString(color) + "(" +
                         ((color >> 16) & 0xff) + ", " +
                         ((color >> 8) & 0xff) + ", " +
-                        ((color >> 0) & 0xff) + ")");
+                        (color & 0xff) + ")");
+        Color2Json color2Json = new Color2Json(
+                selectedLight.getHue(),
+                selectedLight.getSaturation(),
+                selectedLight.getValue(),
+                selectedLight.getArgbColor());
         lightService.changeLightColor(selectedLight.getId(),
-                "text/plain;charset=UTF-8",
-                Integer.toString(color))
+                "application/json;charset=UTF-8",
+                color2Json.JsonString())
                 .enqueue(new Callback<Light>() {
                     @Override
                     public void onResponse(Call<Light> call, Response<Light> response) {
@@ -232,7 +240,6 @@ public class RoomSelectionActivity extends FragmentActivity {
                         Log.i("COLOR PICKER", "Change color request failed." + t);
                     }
                 });
-        colorChangeLightAdapter.getLightViews().get(0).getChangeColorButton().setBackgroundColor(color);
     }
 
     public void showChangeColor(Light light, LightViewHolder lightViewHolder) {
@@ -256,11 +263,9 @@ public class RoomSelectionActivity extends FragmentActivity {
         roomPager.setVisibility(View.INVISIBLE);
         changeColor.setVisibility(View.VISIBLE);
 
-        colorPicker.setInitialColor(light.getColor(), false);
-        lightnessSlider.setColor(light.getColor());
-        float[] hsv = new float[3];
-        Color.colorToHSV(light.getColor(), hsv);
-        colorPicker.setLightness(hsv[2]);
+        // Only hue and saturation are taken into account by the color picker
+        colorPicker.setInitialColor(light.getColorWithMaxValue(), false);
+
     }
 
     public void showRooms() {

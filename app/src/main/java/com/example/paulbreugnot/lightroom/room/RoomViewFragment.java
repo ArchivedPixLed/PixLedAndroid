@@ -78,7 +78,7 @@ public class RoomViewFragment extends Fragment {
                         for (Light light : response.body()) {
                             newLightStatus.put(light.getId(), light.getStatus());
                         }
-                        for(LightViewHolder lightView : lightAdapter.getLightViews()) {
+                        for (LightViewHolder lightView : lightAdapter.getLightViews()) {
                             Light viewLight = lightView.getLight();
                             viewLight.setStatus(newLightStatus.get(viewLight.getId()));
                             lightAdapter.notifyItemChanged(lightView.getAdapterPosition());

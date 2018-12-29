@@ -39,18 +39,12 @@
             app:alphaSlider="false"
             app:density="12"
             app:lightnessSlider="true"
-            app:lightnessSliderView="@+id/lightness_slider"
             app:wheelType="FLOWER" />
-
-        <com.flask.colorpicker.slider.LightnessSlider
-            android:id="@+id/lightness_slider"
-            android:layout_width="match_parent"
-            android:layout_height="15dp" />
 
         <Button
             android:id="@+id/validate_color"
             android:layout_width="150dp"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:text="OK" />
