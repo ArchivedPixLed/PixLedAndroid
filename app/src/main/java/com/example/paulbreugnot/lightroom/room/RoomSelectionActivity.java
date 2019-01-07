@@ -18,25 +18,28 @@ import android.widget.Button;
 import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.building.BuildingSelectionActivity;
 import com.example.paulbreugnot.lightroom.building.BuildingService;
-import com.example.paulbreugnot.lightroom.light.Color2Json;
+import com.example.paulbreugnot.lightroom.light.JsonColor;
 import com.example.paulbreugnot.lightroom.light.Light;
 import com.example.paulbreugnot.lightroom.light.LightAdapter;
 import com.example.paulbreugnot.lightroom.light.LightService;
 import com.example.paulbreugnot.lightroom.light.LightViewHolder;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.paulbreugnot.lightroom.mqtt.MqttAndroidConnection;
+import com.example.paulbreugnot.lightroom.mqtt.MqttAndroidConnectionImpl;
+import com.example.paulbreugnot.lightroom.utils.ServerConfig;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorChangedListener;
 import com.flask.colorpicker.OnColorSelectedListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RoomSelectionActivity extends FragmentActivity {
 
@@ -65,6 +68,13 @@ public class RoomSelectionActivity extends FragmentActivity {
 
     // The adapter of RecyclerView displayed above the color picker
     private LightAdapter colorChangeLightAdapter;
+
+
+    // Map light ids to their lightViews
+    private Map<Long, LightViewHolder> lightViewsIndex = new HashMap<>();
+
+    // Map room id to the adapter containing its lights
+    private Map<Long, LightAdapter> lightAdapterIndex = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -161,8 +171,7 @@ public class RoomSelectionActivity extends FragmentActivity {
         });
 
         final LightService lightService = new Retrofit.Builder()
-                .baseUrl(LightService.ENDPOINT)
-                .addConverterFactory(ScalarsConverterFactory.create())
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(LightService.class);
@@ -176,13 +185,17 @@ public class RoomSelectionActivity extends FragmentActivity {
             }
         });
 
+        // Set up MQTT
+        MqttAndroidConnection mqttAndroidConnection = new MqttAndroidConnectionImpl(this);
+        mqttAndroidConnection.connect(this);
+
         fetchRooms();
     }
 
     private void fetchRooms() {
         // Fetch available rooms for the given building from the server
         BuildingService buildingService = new Retrofit.Builder()
-                .baseUrl(BuildingService.ENDPOINT)
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(BuildingService.class);
@@ -221,14 +234,14 @@ public class RoomSelectionActivity extends FragmentActivity {
                         ((color >> 16) & 0xff) + ", " +
                         ((color >> 8) & 0xff) + ", " +
                         (color & 0xff) + ")");
-        Color2Json color2Json = new Color2Json(
+        JsonColor jsonColor = new JsonColor(
                 selectedLight.getHue(),
                 selectedLight.getSaturation(),
                 selectedLight.getValue(),
                 selectedLight.getArgbColor());
         lightService.changeLightColor(selectedLight.getId(),
                 "application/json;charset=UTF-8",
-                color2Json.JsonString())
+                jsonColor)
                 .enqueue(new Callback<Light>() {
                     @Override
                     public void onResponse(Call<Light> call, Response<Light> response) {
@@ -277,5 +290,14 @@ public class RoomSelectionActivity extends FragmentActivity {
         // Hide the change color view, show the pager view
         changeColor.setVisibility(View.INVISIBLE);
         roomPager.setVisibility(View.VISIBLE);
+    }
+
+
+    public Map<Long, LightViewHolder> getLightViewsIndex() {
+        return lightViewsIndex;
+    }
+
+    public Map<Long, LightAdapter> getLightAdapterIndex() {
+        return lightAdapterIndex;
     }
 }

@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.light.Light;
 import com.example.paulbreugnot.lightroom.room.RoomSelectionActivity;
+import com.example.paulbreugnot.lightroom.utils.ServerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class BuildingSelectionActivity extends Activity {
 //            buildings.add(new Building(i, "Building " + i));
 //        }
         BuildingService buildingService = new Retrofit.Builder()
-                .baseUrl(BuildingService.ENDPOINT)
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(BuildingService.class);

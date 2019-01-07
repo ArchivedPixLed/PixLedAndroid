@@ -1,8 +1,7 @@
 package com.example.paulbreugnot.lightroom.light;
 
-import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.widget.TextView;
 import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.room.RoomSelectionActivity;
 import com.example.paulbreugnot.lightroom.room.RoomViewFragment;
+import com.example.paulbreugnot.lightroom.utils.ServerConfig;
 import com.example.paulbreugnot.lightroom.utils.Status;
 
 import retrofit2.Call;
@@ -21,7 +21,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class LightViewHolder extends RecyclerView.ViewHolder {
 
@@ -36,17 +35,24 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
     private TextView connectedTextView;
     private SeekBar intensitySeekBar;
 
+    // Card view associated to this view
+    private CardView rootCardView;
+
     private RoomViewFragment roomViewFragment;
 
     public LightViewHolder(final View itemView,
                            final RoomViewFragment roomViewFragment,
                            boolean enableColorButton) {
         super(itemView);
+        rootCardView = itemView.findViewById(R.id.rootCardView);
 
         this.roomViewFragment = roomViewFragment;
 
         // Light id view
         lightId = itemView.findViewById(R.id.lightId);
+
+        // Connected TextView
+        connectedTextView = itemView.findViewById(R.id.connected);
 
         // Button used to switch light
         lightSwitch = itemView.findViewById(R.id.lightSwitch);
@@ -54,7 +60,7 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View view) {
                 LightService lightService = new Retrofit.Builder()
-                        .baseUrl(LightService.ENDPOINT)
+                        .baseUrl(ServerConfig.ENDPOINT)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build()
                         .create(LightService.class);
@@ -92,7 +98,7 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
 
         // Instanciating a light service
         final LightService lightService = new Retrofit.Builder()
-                .baseUrl(LightService.ENDPOINT)
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(LightService.class);
@@ -126,6 +132,17 @@ public class LightViewHolder extends RecyclerView.ViewHolder {
         this.light = light;
         lightId.setText((Long.valueOf(light.getId())).toString());
         lightSwitch.setChecked(light.getStatus() == Status.ON);
+        connectedTextView.setText(light.isConnected() ? "connected" : "disconnected");
+
+        connectedTextView.setTextColor(light.isConnected() ?
+                roomViewFragment.getActivity().getResources().getColor(R.color.light_connected) :
+                roomViewFragment.getActivity().getResources().getColor(R.color.light_disconnected));
+
+        rootCardView.setCardBackgroundColor(light.isConnected() ?
+                roomViewFragment.getActivity().getResources().getColor(R.color.card_view_background) :
+                roomViewFragment.getActivity().getResources().getColor(R.color.disconnected_background));
+
+
         changeColorButton.setBackgroundColor(light.getColorWithMaxValue());
         int initialColor = light.getArgbColor();
         intensitySeekBar.getProgressDrawable().setColorFilter(initialColor, PorterDuff.Mode.MULTIPLY);

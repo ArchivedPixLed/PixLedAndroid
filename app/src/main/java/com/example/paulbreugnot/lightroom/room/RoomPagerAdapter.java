@@ -6,7 +6,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import com.example.paulbreugnot.lightroom.light.LightAdapter;
+import com.example.paulbreugnot.lightroom.light.LightViewHolder;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RoomPagerAdapter extends FragmentStatePagerAdapter {
     /*
@@ -21,8 +26,9 @@ public class RoomPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        Bundle args = new Bundle();
         Room room = rooms.get(position);
+
+        Bundle args = new Bundle();
         args.putLong("roomId", room.getId());
         args.putString("roomName", room.getName());
         args.putString("roomStatus", room.getStatus().toString());
@@ -35,5 +41,4 @@ public class RoomPagerAdapter extends FragmentStatePagerAdapter {
     public int getCount() {
         return rooms.size();
     }
-
 }

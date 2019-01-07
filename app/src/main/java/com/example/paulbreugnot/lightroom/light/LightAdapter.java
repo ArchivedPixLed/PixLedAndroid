@@ -7,10 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.paulbreugnot.lightroom.R;
+import com.example.paulbreugnot.lightroom.room.RoomPagerAdapter;
+import com.example.paulbreugnot.lightroom.room.RoomSelectionActivity;
 import com.example.paulbreugnot.lightroom.room.RoomViewFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class LightAdapter extends RecyclerView.Adapter<LightViewHolder> {
 
@@ -49,6 +52,7 @@ public class LightAdapter extends RecyclerView.Adapter<LightViewHolder> {
     @Override
     public void onBindViewHolder(LightViewHolder lightViewHolder, int position) {
         Light light = lightList.get(position);
+        ((RoomSelectionActivity) roomViewFragment.getActivity()).getLightViewsIndex().put(light.getId(), lightViewHolder);
         lightViewHolder.bind(light);
     }
 

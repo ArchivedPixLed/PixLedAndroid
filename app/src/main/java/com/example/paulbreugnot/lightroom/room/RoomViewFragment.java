@@ -17,6 +17,7 @@ import com.example.paulbreugnot.lightroom.R;
 import com.example.paulbreugnot.lightroom.light.Light;
 import com.example.paulbreugnot.lightroom.light.LightAdapter;
 import com.example.paulbreugnot.lightroom.light.LightViewHolder;
+import com.example.paulbreugnot.lightroom.utils.ServerConfig;
 import com.example.paulbreugnot.lightroom.utils.Status;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class RoomViewFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 RoomService roomService = new Retrofit.Builder()
-                        .baseUrl(RoomService.ENDPOINT)
+                        .baseUrl(ServerConfig.ENDPOINT)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build()
                         .create(RoomService.class);
@@ -103,10 +104,13 @@ public class RoomViewFragment extends Fragment {
         // The recycler view (aka a list) in which lights will be displayed
         RecyclerView recyclerView = rootView.findViewById(R.id.lightList);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         lightAdapter = new LightAdapter(lightList, this, true);
         recyclerView.setAdapter(lightAdapter);
+
+        // Synchronize index
+        ((RoomSelectionActivity) getActivity()).getLightAdapterIndex().put(roomId, lightAdapter);
 
         // Fetch lights from the server, feeding the recycler view.
         fetchLights();
@@ -116,7 +120,7 @@ public class RoomViewFragment extends Fragment {
 
     private void fetchLights() {
         RoomService buildingService = new Retrofit.Builder()
-                .baseUrl(RoomService.ENDPOINT)
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(RoomService.class);
@@ -155,7 +159,7 @@ public class RoomViewFragment extends Fragment {
         fetch each time the room status to keep it synchonized.
         */
         RoomService roomService = new Retrofit.Builder()
-                .baseUrl(RoomService.ENDPOINT)
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(RoomService.class);
