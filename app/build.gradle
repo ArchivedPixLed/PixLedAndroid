@@ -39,5 +39,5 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'com.github.PaulBreugnot:pixledserver-core:master-SNAPSHOT'
+    implementation 'com.github.PixLed:PixLedServer-Core:master-SNAPSHOT'
 }
