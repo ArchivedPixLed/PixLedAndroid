@@ -171,7 +171,9 @@ public class RoomSelectionActivity extends FragmentActivity {
         });
 
         final LightService lightService = new Retrofit.Builder()
-                .baseUrl(ServerConfig.ENDPOINT)
+                .baseUrl(ServerConfig
+
+                        .ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(LightService.class);
@@ -188,7 +190,6 @@ public class RoomSelectionActivity extends FragmentActivity {
         // Set up MQTT
         MqttAndroidConnection mqttAndroidConnection = new MqttAndroidConnectionImpl(this);
         mqttAndroidConnection.connect(this);
-
         fetchRooms();
     }
 
