@@ -1,20 +1,20 @@
 <resources>
     <string name="app_name">PixLed</string>
-    <string name="light">Light</string>
+    <string name="device">Device</string>
     <string name="noise">Noise</string>
     <string name="ok">Check</string>
-    <string name="enter_room">Enter Room :</string>
-    <string name="lightonoff">Light ON/OFF</string>
-    <string name="ringonoff">Light ON/OFF</string>
-    <string name="image_content_description">Light Status</string>
+    <string name="enter_group">Enter group :</string>
+    <string name="deviceonoff">device ON/OFF</string>
+    <string name="ringonoff">device ON/OFF</string>
+    <string name="image_content_description">device Status</string>
     <string name="delete_button_description">Delete Button</string>
     <string name="welcome">Welcome to PixLed App!</string>
     <string name="welcome_button">Start now!</string>
     <string name="select_building">Select a building</string>
-    <string name="light_level">Intensity</string>
-    <string name="light_number">Number of lights :</string>
-    <string name="room_switch">Switch Room</string>
+    <string name="device_level">Intensity</string>
+    <string name="device_number">Number of devices :</string>
+    <string name="group_switch">Switch Group</string>
     <string name="color">Color</string>
     <string name="status">Status</string>
-    <string name="change_light_color">Change Light Color</string>
+    <string name="change_device_color">Change Device Color</string>
 </resources>

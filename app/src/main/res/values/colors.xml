@@ -3,14 +3,14 @@
     <color name="colorPrimary">#75a6ff</color>
     <color name="colorPrimaryDark">#02074b</color>
     <color name="colorAccent">#5474e6</color>
-    <color name="light_name_color">#252525</color>
-    <color name="light_connected">#179924</color>
+    <color name="device_name_color">#252525</color>
+    <color name="device_connected">#179924</color>
     <color name="connected_background">#d0ffd4</color>
-    <color name="light_disconnected">#ff1837</color>
+    <color name="device_disconnected">#ff1837</color>
     <color name="disconnected_background">#ff9999</color>
-    <color name="background_material_light">#fbe1ff</color>
-    <color name="primary_material_light">#eb81fe</color>
-    <color name="accent_material_light">#c54ed9</color>
-    <color name="primary_dark_material_light">#79118a</color>
+    <color name="background_material_device">#fbe1ff</color>
+    <color name="primary_material_device">#eb81fe</color>
+    <color name="accent_material_device">#c54ed9</color>
+    <color name="primary_dark_material_device">#79118a</color>
     <color name="card_view_background">#ffccff</color>
 </resources>

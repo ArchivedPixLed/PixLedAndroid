@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.paulbreugnot.lightroom"
-        minSdkVersion 18
+        applicationId "com.pixled.pixledandroid"
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -18,10 +18,6 @@ android {
     }
 }
 
-configurations.all {
-    exclude group: 'com.android.support', module: 'support-v4'
-    exclude group: 'com.google.android', module: 'support-v4'
-}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
@@ -39,5 +35,5 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
-    implementation 'com.github.PixLed:PixLedServer-Core:master-SNAPSHOT'
+    implementation 'com.github.PixLed:PixLedServer-Core:v0.2.4'
 }

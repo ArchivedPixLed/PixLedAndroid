@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.paulbreugnot.lightroom">
+    package="com.pixled.pixledandroid">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -15,19 +15,19 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/PixLedTheme">
-        <activity android:name=".welcome.WelcomeActivity">
+        <activity android:name="com.pixled.pixledandroid.welcome.WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".building.BuildingSelectionActivity">
+        <activity android:name="com.pixled.pixledandroid.building.BuildingSelectionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name=".room.RoomSelectionActivity">
+        <activity android:name="com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
