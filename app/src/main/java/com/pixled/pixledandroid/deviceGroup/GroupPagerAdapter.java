@@ -26,7 +26,7 @@ public class GroupPagerAdapter extends FragmentStatePagerAdapter {
         DeviceGroup deviceGroup = groups.get(position);
 
         Bundle args = new Bundle();
-        args.putLong("groupId", deviceGroup.getId());
+        args.putInt("groupId", deviceGroup.getId());
         args.putString("groupName", deviceGroup.getName());
         args.putString("groupStatus", deviceGroup.getDeviceGroupState().getToggleState().toString());
         Fragment fragment = new GroupViewFragment();

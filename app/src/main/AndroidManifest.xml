@@ -22,11 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.pixled.pixledandroid.building.BuildingSelectionActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-        </activity>
         <activity android:name="com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

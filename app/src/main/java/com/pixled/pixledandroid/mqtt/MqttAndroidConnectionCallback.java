@@ -31,19 +31,21 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         Long id = Long.valueOf(message.toString());
         Log.i("MQTT","Light " + id + " : " + topic);
-        DeviceViewHolder deviceView = roomSelectionActivity.getDeviceViewsIndex().get(id);
+        if (roomSelectionActivity != null) {
+            DeviceViewHolder deviceView = roomSelectionActivity.getDeviceViewsIndex().get(id);
         /*
         TODO: Handle multiple groups
          */
-        DeviceAdapter deviceAdapter = roomSelectionActivity.getDeviceAdapterIndex().get(deviceView.getDevice().getDeviceGroups().get(0).getId());
-        if (deviceView != null) {
-            if (topic.equals(MqttAndroidConnection.connected_topic)) {
-                deviceView.getDevice().getDeviceState().setConnected(true);
+            DeviceAdapter deviceAdapter = roomSelectionActivity.getDeviceAdapterIndex().get(deviceView.getDevice().getDeviceGroups().get(0).getId());
+            if (deviceView != null) {
+                if (topic.equals(MqttAndroidConnection.connected_topic)) {
+                    deviceView.getDevice().getDeviceState().setConnected(true);
 
-            } else if (topic.equals(MqttAndroidConnection.disconnected_topic)) {
-                deviceView.getDevice().getDeviceState().setConnected(false);
+                } else if (topic.equals(MqttAndroidConnection.disconnected_topic)) {
+                    deviceView.getDevice().getDeviceState().setConnected(false);
+                }
+                deviceAdapter.notifyItemChanged(deviceView.getAdapterPosition());
             }
-            deviceAdapter.notifyItemChanged(deviceView.getAdapterPosition());
         }
     }
 

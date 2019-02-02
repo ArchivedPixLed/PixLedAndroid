@@ -13,7 +13,7 @@ import retrofit2.http.Path;
 public interface GroupService {
 
     @GET("groups")
-    Call<List<DeviceGroupDto>> listRooms();
+    Call<List<DeviceGroupDto>> listGroups();
 
     @GET("groups/{id}")
     Call<DeviceGroupDto> getGroup(@Path("id") int id);

@@ -17,4 +17,9 @@
     <string name="color">Color</string>
     <string name="status">Status</string>
     <string name="change_device_color">Change Device Color</string>
+    <string name="checkServer">Looking for the PixLedServer...</string>
+    <string name="checkMqtt">Looking for the MQTT broker...</string>
+    <string name="setup_success">PixLed is ready!</string>
+    <string name="mqtt_connection_failed">MQTT connection failed. =(</string>
+    <string name="connecting_mqtt">Connecting to the MQTT broker...</string>
 </resources>

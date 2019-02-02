@@ -112,6 +112,7 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // set seek bar color
+                Log.i("PROGRESS BAR CHECK","Change color");
                 device.getDeviceState().getColor().setValue(((float) progress) / 100);
                 intensitySeekBar.getProgressDrawable().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.MULTIPLY);
                 intensitySeekBar.getThumb().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.SRC_ATOP);

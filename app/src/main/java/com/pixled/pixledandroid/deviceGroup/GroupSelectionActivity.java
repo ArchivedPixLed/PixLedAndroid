@@ -25,10 +25,12 @@ import com.pixled.pixledandroid.device.DeviceViewHolder;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnection;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
 import com.pixled.pixledandroid.utils.ServerConfig;
+import com.pixled.pixledandroid.welcome.WelcomeActivity;
 import com.pixled.pixledserver.core.color.ColorDto;
 import com.pixled.pixledserver.core.device.base.Device;
 import com.pixled.pixledserver.core.device.base.DeviceDto;
 import com.pixled.pixledserver.core.group.DeviceGroup;
+import com.pixled.pixledserver.core.group.DeviceGroupDto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,13 +88,6 @@ public class GroupSelectionActivity extends FragmentActivity {
         // Specify that tabs should be displayed in the action bar.
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        // Retrieves Building informations from the original BuildingSelectionActivity
-        Intent intent = getIntent();
-        // buildingId = intent.getLongExtra(BuildingSelectionActivity.EXTRA_BUILDING_ID, 0L);
-        // buildingName = intent.getStringExtra(BuildingSelectionActivity.EXTRA_BUILDING_NAME);
-        // Log.i(LOG_TAG, "Building id : " + buildingId);
-        // Log.i(LOG_TAG, "Building name : " + buildingName);
-
         // Set up main view
         setTitle("Device Groups");
         setContentView(R.layout.group_pager);
@@ -102,7 +97,7 @@ public class GroupSelectionActivity extends FragmentActivity {
 
 
         // Instantiate a ViewPager and a PagerAdapter.
-        groupPager = findViewById(R.id.room_pager);
+        groupPager = findViewById(R.id.group_pager);
         groupPagerAdapter = new GroupPagerAdapter(getSupportFragmentManager(), groups);
         groupPager.setAdapter(groupPagerAdapter);
         getActionBar().show();
@@ -212,45 +207,45 @@ public class GroupSelectionActivity extends FragmentActivity {
         });
 
         // Set up MQTT
-        MqttAndroidConnection mqttAndroidConnection = new MqttAndroidConnectionImpl(this);
-        mqttAndroidConnection.connect(this);
-        // fetchRooms();
+        ((MqttAndroidConnectionImpl) WelcomeActivity.mqttAndroidConnection).setGroupSelectionActivity(this);
+
+        fetchGroups();
     }
 
-//    private void fetchRooms() {
-//        // Fetch available rooms for the given building from the server
-//        BuildingService buildingService = new Retrofit.Builder()
-//                .baseUrl(ServerConfig.ENDPOINT)
-//                .addConverterFactory(JacksonConverterFactory.create())
-//                .build()
-//                .create(BuildingService.class);
-//
-//        buildingService.listBuildingRooms(buildingId).enqueue(new Callback<List<Room>>() {
-//            ActionBar actionBar = getActionBar();
-//
-//            @Override
-//            public void onResponse(Call<List<Room>> call, Response<List<Room>> response) {
-//                List<Room> listRooms = response.body();
-//
-//                Log.i("RETROFIT", listRooms.size() + " buildings fetched.");
-//                for (Room r : listRooms) {
-//                    Log.i("RETROFIT","Room : " + r.getName());
-//                    rooms.add(r);
-//                    groupPagerAdapter.notifyDataSetChanged();
-//                    actionBar.addTab(
-//                            actionBar.newTab()
-//                                    .setText(r.getName())
-//                                    .setTabListener(tabListener));
-//                    // buildingAdapter.notifyItemInserted(buildings.size() - 1);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<List<Room>> call, Throwable t) {
-//                Log.e("RETROFIT","Retrofit error : " + t);
-//            }
-//        });
-//    }
+    private void fetchGroups() {
+        // Fetch available rooms for the given building from the server
+        GroupService groupService = new Retrofit.Builder()
+                .baseUrl(ServerConfig.ENDPOINT)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build()
+                .create(GroupService.class);
+
+        groupService.listGroups().enqueue(new Callback<List<DeviceGroupDto>>() {
+            ActionBar actionBar = getActionBar();
+
+            @Override
+            public void onResponse(Call<List<DeviceGroupDto>> call, Response<List<DeviceGroupDto>> response) {
+                List<DeviceGroupDto> listGroups = response.body();
+
+                Log.i("RETROFIT", listGroups.size() + " groups fetched.");
+                for (DeviceGroupDto r : listGroups) {
+                    Log.i("RETROFIT","Group : " + r.getName());
+                    groups.add(new DeviceGroup(r));
+                    groupPagerAdapter.notifyDataSetChanged();
+                    actionBar.addTab(
+                            actionBar.newTab()
+                                    .setText(r.getName())
+                                    .setTabListener(tabListener));
+                    // groupPagerAdapter.notifyItemInserted(listGroups.size() - 1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<DeviceGroupDto>> call, Throwable t) {
+                Log.e("RETROFIT","Retrofit error : " + t);
+            }
+        });
+    }
 
     public static void publishColorChanged(DeviceService deviceService, Device selectedDevice) {
         int color = selectedDevice.getDeviceState().getColor().getArgb();
@@ -283,7 +278,7 @@ public class GroupSelectionActivity extends FragmentActivity {
     public void showChangeColor(Device device, DeviceViewHolder deviceViewHolder) {
         // Hide the pager view, show the color change view (called from "changeColor buttons" in
         // LightViewHolders.
-        selectedDevice = selectedDevice;
+        selectedDevice = device;
         selectedDeviceViewHolder = deviceViewHolder;
         // The recycler view (aka a list) in which lights will be displayed
 

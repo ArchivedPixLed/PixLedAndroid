@@ -54,7 +54,7 @@ public class GroupViewFragment extends Fragment {
         /*
         Used to show the number of available rooms at the top of the view.
          */
-        deviceNumberTextView = rootView.findViewById(R.id.lightNumber);
+        deviceNumberTextView = rootView.findViewById(R.id.deviceCount);
         deviceNumberTextView.setText("0");
 
         /*
@@ -78,7 +78,7 @@ public class GroupViewFragment extends Fragment {
                         // Synchronize each light status
                         HashMap<Integer, ToggleState> newDeviceStatus = new HashMap<>();
                         for (DeviceDto device : response.body()) {
-                            newDeviceStatus.put(device.getId(), device.getState().getToggleState());
+                            newDeviceStatus.put(device.getId(), device.getState().getToggle());
                         }
                         for (DeviceViewHolder deviceView : deviceAdapter.getDeviceViews()) {
                             Device viewDevice = deviceView.getDevice();
@@ -99,11 +99,11 @@ public class GroupViewFragment extends Fragment {
         // Init button status
         groupSwitch.setChecked(getArguments().getString("groupStatus").equals("ON"));
 
-        // Retrieve the id of the room corresponding to this view
+        // Retrieve the id of the group corresponding to this view
         groupId = getArguments().getInt("groupId");
 
         // The recycler view (aka a list) in which lights will be displayed
-        RecyclerView recyclerView = rootView.findViewById(R.id.lightList);
+        RecyclerView recyclerView = rootView.findViewById(R.id.deviceList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -122,7 +122,8 @@ public class GroupViewFragment extends Fragment {
     private void fetchDevices() {
         GroupService buildingService = new Retrofit.Builder()
                 .baseUrl(ServerConfig.ENDPOINT)
-                .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().enableDefaultTyping()))
+                // .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().enableDefaultTyping()))
+                .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(GroupService.class);
 
@@ -132,16 +133,16 @@ public class GroupViewFragment extends Fragment {
             public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
                 List<DeviceDto> list = response.body();
 
-                Log.i("RETROFIT", deviceList.size() + " lights fetched.");
+                Log.i("RETROFIT", deviceList.size() + " devices fetched.");
                 for (DeviceDto d : list) {
-                    Log.i("RETROFIT","Light : " + d.getId());
+                    Log.i("RETROFIT","Device : " + d.getId());
                     deviceList.add(d.generateDevice());
                     // Update the recycler view
                     deviceAdapter.notifyItemInserted(deviceList.size() - 1);
 
                     // Update light number
                     deviceNumber++;
-                    deviceNumberTextView.setText(deviceNumber);
+                    deviceNumberTextView.setText(String.valueOf(deviceNumber));
                 }
             }
 
@@ -168,7 +169,7 @@ public class GroupViewFragment extends Fragment {
         roomService.getGroup(groupId).enqueue(new Callback<DeviceGroupDto>() {
             @Override
             public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
-                groupSwitch.setChecked(response.body().getState().getToggleState() == ToggleState.ON);
+                groupSwitch.setChecked(response.body().getState().getToggle() == ToggleState.ON);
             }
 
             @Override

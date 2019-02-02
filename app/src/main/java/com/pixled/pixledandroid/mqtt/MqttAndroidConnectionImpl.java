@@ -5,8 +5,11 @@ import android.util.Log;
 
 import com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity;
 import com.pixled.pixledandroid.utils.ServerConfig;
+import com.pixled.pixledandroid.welcome.MqttConnectionStatusHandler;
+import com.pixled.pixledandroid.welcome.WelcomeActivity;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -16,10 +19,15 @@ public class MqttAndroidConnectionImpl implements  MqttAndroidConnection {
 
     private static final String clientId = "PixLedAndroid";
 
-    private GroupSelectionActivity roomSelectionActivity;
+    private GroupSelectionActivity groupSelectionActivity;
+    private WelcomeActivity welcomeActivity;
 
-    public MqttAndroidConnectionImpl(GroupSelectionActivity roomSelectionActivity) {
-        this.roomSelectionActivity = roomSelectionActivity;
+    public MqttAndroidConnectionImpl(WelcomeActivity welcomeActivity) {
+        this.welcomeActivity = welcomeActivity;
+    }
+
+    public void setGroupSelectionActivity(GroupSelectionActivity groupSelectionActivity) {
+        this.groupSelectionActivity = groupSelectionActivity;
     }
 
     @Override
@@ -28,10 +36,11 @@ public class MqttAndroidConnectionImpl implements  MqttAndroidConnection {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
         options.setConnectionTimeout(10);
-        mqttAndroidClient.setCallback(new MqttAndroidConnectionCallback(roomSelectionActivity, mqttAndroidClient));
+        mqttAndroidClient.setCallback(new MqttAndroidConnectionCallback(groupSelectionActivity, mqttAndroidClient));
         Log.i("MQTT", "Connecting...");
         try {
-            mqttAndroidClient.connect(options);
+            mqttAndroidClient.connect(options, context, new MqttConnectionStatusHandler(welcomeActivity));
+
         } catch (MqttException e) {
             e.printStackTrace();
         }

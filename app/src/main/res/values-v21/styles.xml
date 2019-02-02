@@ -2,13 +2,13 @@
 <resources>
 
     <style name="PixLedTheme" parent="android:Theme.Material.Light">
-        <item name="android:colorBackground">@color/background_material_light</item>
-        <item name="android:colorPrimary">@color/primary_material_light</item>
-        <item name="android:colorAccent">@color/accent_material_light</item>
-        <item name="android:colorPrimaryDark">@color/primary_dark_material_light</item>
+        <item name="android:colorBackground">@color/background_material_device</item>
+        <item name="android:colorPrimary">@color/primary_material_device</item>
+        <item name="android:colorAccent">@color/accent_material_device</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark_material_device</item>
         <item name="android:textColorSecondaryInverse">@android:color/secondary_text_light</item>
         <item name="android:statusBarColor">@android:color/black</item>
-        <item name="android:colorButtonNormal">@color/accent_material_light</item>
+        <item name="android:colorButtonNormal">@color/accent_material_device</item>
     </style>
     <style name="CardViewStyle" parent="CardView">
         <item name="cardBackgroundColor">@color/card_view_background</item>
