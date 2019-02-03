@@ -1,4 +1,4 @@
-package com.pixled.pixledandroid.deviceGroup;
+package com.pixled.pixledandroid.deviceGroup.mainActivity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceViewHolder;

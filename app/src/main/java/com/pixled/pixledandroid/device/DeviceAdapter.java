@@ -6,8 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pixled.pixledandroid.R;
-import com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity;
-import com.pixled.pixledandroid.deviceGroup.GroupViewFragment;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupViewFragment;
 import com.pixled.pixledserver.core.device.base.Device;
 
 import java.util.ArrayList;

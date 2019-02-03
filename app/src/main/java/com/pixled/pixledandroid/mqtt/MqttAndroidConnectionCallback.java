@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
-import com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;

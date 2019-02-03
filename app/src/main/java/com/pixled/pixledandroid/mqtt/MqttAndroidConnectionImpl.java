@@ -3,13 +3,12 @@ package com.pixled.pixledandroid.mqtt;
 import android.content.Context;
 import android.util.Log;
 
-import com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledandroid.welcome.MqttConnectionStatusHandler;
 import com.pixled.pixledandroid.welcome.WelcomeActivity;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 

@@ -1,7 +1,5 @@
 package com.pixled.pixledandroid.welcome;
 
-import android.support.v7.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
@@ -14,7 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.pixled.pixledandroid.R;
-import com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnection;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
 import com.pixled.pixledandroid.utils.ServerConfig;

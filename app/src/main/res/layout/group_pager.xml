@@ -15,23 +15,43 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme" />
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/sliding_tabs"
+    <LinearLayout
+        android:id="@+id/tabsLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary_material_device"
-        app:layout_constraintTop_toBottomOf="@+id/groupToolbar"
-        app:tabBackground="@color/primary_material_device"
-        app:tabGravity="fill"
-        app:tabIndicatorColor="@color/accent_material_device"
-        app:tabMode="scrollable" />
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/groupToolbar">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/sliding_tabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:tabBackground="@color/primary_material_device"
+            app:tabIndicatorColor="@color/accent_material_device"
+            app:tabMode="scrollable" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_weight="0"
+            android:background="@color/primary_material_device"
+            android:src="@drawable/add"
+            app:srcCompat="@drawable/add" />
+
+    </LinearLayout>
 
     <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/group_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@+id/sliding_tabs">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tabsLinearLayout">
 
     </android.support.v4.view.ViewPager>
 
@@ -39,14 +59,14 @@
     <LinearLayout
         android:id="@+id/change_color"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/groupToolbar">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/selected_device_view"

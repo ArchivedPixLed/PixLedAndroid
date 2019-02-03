@@ -1,14 +1,10 @@
-package com.pixled.pixledandroid.deviceGroup;
+package com.pixled.pixledandroid.deviceGroup.mainActivity;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorChangedListener;
@@ -26,7 +23,6 @@ import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceService;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
-import com.pixled.pixledandroid.mqtt.MqttAndroidConnection;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledandroid.welcome.WelcomeActivity;
@@ -59,6 +55,8 @@ public class GroupSelectionActivity extends AppCompatActivity {
 
     // private ActionBar.TabListener tabListener;
     private TabLayout tabLayout;
+    private Toolbar toolbar;
+    private LinearLayout tabView;
 
     // private long buildingId;
     // private String buildingName;
@@ -87,20 +85,13 @@ public class GroupSelectionActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        // Action bar that is shown on top of the app
-//        final ActionBar actionBar = getActionBar();
-//
-//        // Specify that tabs should be displayed in the action bar.
-//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
         // Set up main view
-        // setTitle("Device Groups");
         setContentView(R.layout.group_pager);
 
 
-        Toolbar groupToolbar = (Toolbar) findViewById(R.id.groupToolbar);
-        setSupportActionBar(groupToolbar);
-        getSupportActionBar().setTitle("PixLed - Device Groups");
+        // Set up tool bar
+        toolbar = findViewById(R.id.groupToolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().show();
 
         // Instantiate a ViewPager and a PagerAdapter.
@@ -113,36 +104,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(groupPager);
 
-//        // Create a tab listener that is called when the user changes tabs.
-//        tabListener = new ActionBar.TabListener() {
-//
-//            @Override
-//            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-//                // When the tab is selected, switch to the
-//                // corresponding page in the ViewPager.
-//                groupPager.setCurrentItem(tab.getPosition());
-//            }
-//
-//            @Override
-//            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-//            }
-//
-//            @Override
-//            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-//            }
-//
-//        };
-//
-//        groupPager.addOnPageChangeListener(
-//                new ViewPager.SimpleOnPageChangeListener() {
-//                    @Override
-//                    public void onPageSelected(int position) {
-//                        // When swiping between pages, select the
-//                        // corresponding tab.
-//                        actionBar.setSelectedNavigationItem(position);
-//                        tabLayout.setSel
-//                    }
-//                });
+        tabView = findViewById(R.id.tabsLinearLayout);
 
         /*
         Set up change color
@@ -244,14 +206,6 @@ public class GroupSelectionActivity extends AppCompatActivity {
                     Log.i("RETROFIT","Group : " + r.getName());
                     groups.add(new DeviceGroup(r));
                     groupPagerAdapter.notifyDataSetChanged();
-//                    actionBar.addTab(
-//                            actionBar.newTab()
-//                                    .setText(r.getName())
-//                                    .setTabListener(tabListener));
-//                    tabLayout.addTab(
-//                            tabLayout.newTab()
-//                                    .setText(r.getName()));
-                    // groupPagerAdapter.notifyItemInserted(listGroups.size() - 1);
                 }
             }
 
@@ -308,7 +262,9 @@ public class GroupSelectionActivity extends AppCompatActivity {
 
         // getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         groupPager.setVisibility(View.INVISIBLE);
+        tabView.setVisibility(View.INVISIBLE);
         changeColor.setVisibility(View.VISIBLE);
+        toolbar.setTitle("Change Device Color");
 
         // Only hue and saturation are taken into account by the color picker
         float[] hsv = {
@@ -329,6 +285,8 @@ public class GroupSelectionActivity extends AppCompatActivity {
         // Hide the change color view, show the pager view
         changeColor.setVisibility(View.INVISIBLE);
         groupPager.setVisibility(View.VISIBLE);
+        tabView.setVisibility(View.VISIBLE);
+        toolbar.setTitle("Available Devices");
     }
 
 

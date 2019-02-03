@@ -12,8 +12,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.pixled.pixledandroid.R;
-import com.pixled.pixledandroid.deviceGroup.GroupSelectionActivity;
-import com.pixled.pixledandroid.deviceGroup.GroupViewFragment;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupViewFragment;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
 import com.pixled.pixledserver.core.device.base.Device;

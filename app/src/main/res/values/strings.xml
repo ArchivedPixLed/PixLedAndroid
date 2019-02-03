@@ -22,4 +22,6 @@
     <string name="setup_success">PixLed is ready!</string>
     <string name="mqtt_connection_failed">MQTT connection failed. =(</string>
     <string name="connecting_mqtt">Connecting to the MQTT broker...</string>
+    <string name="add_device_to_group">Add Device</string>
+    <string name="edit_group">Edit Group</string>
 </resources>

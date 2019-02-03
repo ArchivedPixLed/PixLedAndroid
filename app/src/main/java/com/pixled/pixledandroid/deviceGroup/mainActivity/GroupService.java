@@ -1,4 +1,4 @@
-package com.pixled.pixledandroid.deviceGroup;
+package com.pixled.pixledandroid.deviceGroup.mainActivity;
 
 import com.pixled.pixledserver.core.device.base.DeviceDto;
 import com.pixled.pixledserver.core.group.DeviceGroupDto;
