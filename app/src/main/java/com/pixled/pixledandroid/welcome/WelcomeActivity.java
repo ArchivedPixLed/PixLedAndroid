@@ -18,6 +18,7 @@ import com.pixled.pixledandroid.mqtt.MqttAndroidConnection;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
 import com.pixled.pixledandroid.utils.ServerConfig;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 
 public class WelcomeActivity extends Activity {
@@ -84,17 +85,22 @@ public class WelcomeActivity extends Activity {
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.i(TAG, "Resolve Succeeded. " + serviceInfo);
+                if (serviceInfo.getHost() instanceof Inet4Address) {
+                    Log.i(TAG, "Resolve Succeeded. " + serviceInfo);
 
-                NsdServiceInfo mService = serviceInfo;
-                serverPort = mService.getPort();
-                serverHost = mService.getHost();
-                serverOk = true;
+                    NsdServiceInfo mService = serviceInfo;
+                    serverPort = mService.getPort();
+                    serverHost = mService.getHost();
+                    serverOk = true;
 
-                ServerConfig.setEndpoint(serverPort, serverHost);
+                    ServerConfig.setEndpoint(serverPort, serverHost);
 
-                updateServerTaskStatus();
-                mNsdManager.stopServiceDiscovery(discoveryListener);
+                    updateServerTaskStatus();
+                    mNsdManager.stopServiceDiscovery(discoveryListener);
+                }
+                else {
+                    Log.i(TAG, "Resolve Succeeded, but unsupported IPv6 : " + serviceInfo);
+                }
             }
         };
 
@@ -108,18 +114,23 @@ public class WelcomeActivity extends Activity {
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.i(TAG, "Resolve Succeeded. " + serviceInfo);
+                if (serviceInfo.getHost() instanceof Inet4Address) {
+                    Log.i(TAG, "Resolve Succeeded. " + serviceInfo);
 
-                NsdServiceInfo mService = serviceInfo;
-                brokerPort = mService.getPort();
-                brokerHost = mService.getHost();
-                brokerOk = true;
+                    NsdServiceInfo mService = serviceInfo;
+                    brokerPort = mService.getPort();
+                    brokerHost = mService.getHost();
+                    brokerOk = true;
 
-                ServerConfig.setBrokerUri(brokerPort, brokerHost);
+                    ServerConfig.setBrokerUri(brokerPort, brokerHost);
 
-                updateBrokerTaskStatus();
-                mNsdManager.stopServiceDiscovery(discoveryListener);
-                initMqttConnection();
+                    updateBrokerTaskStatus();
+                    mNsdManager.stopServiceDiscovery(discoveryListener);
+                    initMqttConnection();
+                }
+                else {
+                    Log.i(TAG, "Resolve Succeeded, but unsupported IPv6 : " + serviceInfo);
+                }
             }
         };
 
