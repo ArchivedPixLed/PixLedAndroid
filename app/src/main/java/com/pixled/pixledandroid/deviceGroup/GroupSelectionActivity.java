@@ -1,16 +1,20 @@
 package com.pixled.pixledandroid.deviceGroup;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,7 +47,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-public class GroupSelectionActivity extends FragmentActivity {
+public class GroupSelectionActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "SELECT_GROUP";
 
@@ -53,7 +57,8 @@ public class GroupSelectionActivity extends FragmentActivity {
     private ViewPager groupPager;
     private PagerAdapter groupPagerAdapter;
 
-    private ActionBar.TabListener tabListener;
+    // private ActionBar.TabListener tabListener;
+    private TabLayout tabLayout;
 
     // private long buildingId;
     // private String buildingName;
@@ -82,55 +87,62 @@ public class GroupSelectionActivity extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Action bar that is shown on top of the app
-        final ActionBar actionBar = getActionBar();
-
-        // Specify that tabs should be displayed in the action bar.
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+//        // Action bar that is shown on top of the app
+//        final ActionBar actionBar = getActionBar();
+//
+//        // Specify that tabs should be displayed in the action bar.
+//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         // Set up main view
-        setTitle("Device Groups");
+        // setTitle("Device Groups");
         setContentView(R.layout.group_pager);
 
-        // To show pages (aka rooms) as tabs
-        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
+        Toolbar groupToolbar = (Toolbar) findViewById(R.id.groupToolbar);
+        setSupportActionBar(groupToolbar);
+        getSupportActionBar().setTitle("PixLed - Device Groups");
+        getSupportActionBar().show();
 
         // Instantiate a ViewPager and a PagerAdapter.
         groupPager = findViewById(R.id.group_pager);
         groupPagerAdapter = new GroupPagerAdapter(getSupportFragmentManager(), groups);
         groupPager.setAdapter(groupPagerAdapter);
-        getActionBar().show();
+        // getActionBar().show();
 
-        // Create a tab listener that is called when the user changes tabs.
-        tabListener = new ActionBar.TabListener() {
+        // Give the TabLayout the ViewPager
+        tabLayout = findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(groupPager);
 
-            @Override
-            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // When the tab is selected, switch to the
-                // corresponding page in the ViewPager.
-                groupPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            }
-
-            @Override
-            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            }
-
-        };
-
-        groupPager.addOnPageChangeListener(
-                new ViewPager.SimpleOnPageChangeListener() {
-                    @Override
-                    public void onPageSelected(int position) {
-                        // When swiping between pages, select the
-                        // corresponding tab.
-                        actionBar.setSelectedNavigationItem(position);
-                    }
-                });
+//        // Create a tab listener that is called when the user changes tabs.
+//        tabListener = new ActionBar.TabListener() {
+//
+//            @Override
+//            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+//                // When the tab is selected, switch to the
+//                // corresponding page in the ViewPager.
+//                groupPager.setCurrentItem(tab.getPosition());
+//            }
+//
+//            @Override
+//            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+//            }
+//
+//            @Override
+//            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+//            }
+//
+//        };
+//
+//        groupPager.addOnPageChangeListener(
+//                new ViewPager.SimpleOnPageChangeListener() {
+//                    @Override
+//                    public void onPageSelected(int position) {
+//                        // When swiping between pages, select the
+//                        // corresponding tab.
+//                        actionBar.setSelectedNavigationItem(position);
+//                        tabLayout.setSel
+//                    }
+//                });
 
         /*
         Set up change color
@@ -232,10 +244,13 @@ public class GroupSelectionActivity extends FragmentActivity {
                     Log.i("RETROFIT","Group : " + r.getName());
                     groups.add(new DeviceGroup(r));
                     groupPagerAdapter.notifyDataSetChanged();
-                    actionBar.addTab(
-                            actionBar.newTab()
-                                    .setText(r.getName())
-                                    .setTabListener(tabListener));
+//                    actionBar.addTab(
+//                            actionBar.newTab()
+//                                    .setText(r.getName())
+//                                    .setTabListener(tabListener));
+//                    tabLayout.addTab(
+//                            tabLayout.newTab()
+//                                    .setText(r.getName()));
                     // groupPagerAdapter.notifyItemInserted(listGroups.size() - 1);
                 }
             }
@@ -291,7 +306,7 @@ public class GroupSelectionActivity extends FragmentActivity {
         colorChangeDeviceAdapter = new DeviceAdapter(deviceList, deviceViewHolder.getGroupViewFragment(), false);
         recyclerView.setAdapter(colorChangeDeviceAdapter);
 
-        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        // getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         groupPager.setVisibility(View.INVISIBLE);
         changeColor.setVisibility(View.VISIBLE);
 
@@ -308,7 +323,7 @@ public class GroupSelectionActivity extends FragmentActivity {
     public void showGroups() {
         // Synchronized the original light card view with the one that was displayed with the color
         // picker.
-        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        // getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         selectedDeviceViewHolder.getGroupViewFragment().getDeviceAdapter()
                 .notifyItemChanged(selectedDeviceViewHolder.getAdapterPosition());
         // Hide the change color view, show the pager view

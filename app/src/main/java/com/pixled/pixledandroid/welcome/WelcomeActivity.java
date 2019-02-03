@@ -1,12 +1,13 @@
 package com.pixled.pixledandroid.welcome;
 
-import android.app.ActionBar;
+import android.support.v7.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,7 +22,7 @@ import com.pixled.pixledandroid.utils.ServerConfig;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 
-public class WelcomeActivity extends Activity {
+public class WelcomeActivity extends AppCompatActivity {
 
     private static final String TAG = "LOADING";
 
@@ -48,8 +49,8 @@ public class WelcomeActivity extends Activity {
         // setTitle(R.string.welcome);
 
 
-        ActionBar actionBar = getActionBar();
-        actionBar.hide();
+        // ActionBar actionBar = getActionBar();
+        // actionBar.hide();
 
         setContentView(R.layout.welcome);
 

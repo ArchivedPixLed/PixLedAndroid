@@ -33,8 +33,10 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class GroupViewFragment extends Fragment {
     /*
-    This fragment corresponds to a room page.
+    This fragment corresponds to a group page.
      */
+
+    private static final String TAG = "GROUP_PAGE";
     private int groupId;
     private List<Device> deviceList = new ArrayList<>();
 
@@ -68,7 +70,7 @@ public class GroupViewFragment extends Fragment {
             public void onClick(View v) {
                 GroupService roomService = new Retrofit.Builder()
                         .baseUrl(ServerConfig.ENDPOINT)
-                        .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().enableDefaultTyping()))
+                        .addConverterFactory(JacksonConverterFactory.create())
                         .build()
                         .create(GroupService.class);
 
@@ -90,6 +92,7 @@ public class GroupViewFragment extends Fragment {
                     @Override
                     public void onFailure(Call<List<DeviceDto>> call, Throwable t) {
                         // Canceled operation
+                        Log.i(TAG, "Request failed : ", t);
                         groupSwitch.setChecked(!groupSwitch.isChecked());
                     }
                 });

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 
 import com.pixled.pixledserver.core.device.base.Device;
 import com.pixled.pixledserver.core.group.DeviceGroup;
@@ -36,6 +37,13 @@ public class GroupPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
+        Log.i("TEST PAGER", String.valueOf(groups.size()));
         return groups.size();
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        // Generate title based on item position
+        return groups.get(position).getName();
     }
 }
