@@ -24,4 +24,7 @@
     <string name="connecting_mqtt">Connecting to the MQTT broker...</string>
     <string name="add_device_to_group">Add Device</string>
     <string name="edit_group">Edit Group</string>
+    <string name="devices_in_group">Devices In Group :</string>
+    <string name="available_devices">Available Devices :</string>
+    <string name="all_devices_in_group">All devices are currently in this group!</string>
 </resources>

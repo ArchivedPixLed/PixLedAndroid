@@ -125,7 +125,6 @@ public class WelcomeActivity extends AppCompatActivity {
 
                     updateBrokerTaskStatus();
                     mNsdManager.stopServiceDiscovery(discoveryListener);
-                    initMqttConnection();
                 }
                 else {
                     Log.i(TAG, "Resolve Succeeded, but unsupported IPv6 : " + serviceInfo);
@@ -187,6 +186,9 @@ public class WelcomeActivity extends AppCompatActivity {
                 if (!brokerOk) {
                     mNsdManager.discoverServices(
                             "_mqtt._tcp.", NsdManager.PROTOCOL_DNS_SD, discoveryListener);
+                }
+                else {
+                    initMqttConnection();
                 }
             }
 

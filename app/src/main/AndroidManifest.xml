@@ -27,6 +27,11 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+        <activity android:name="com.pixled.pixledandroid.deviceGroup.editActivity.EditGroupActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
         <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>
 

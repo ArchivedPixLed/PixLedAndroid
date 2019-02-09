@@ -1,5 +1,6 @@
 package com.pixled.pixledandroid.deviceGroup.mainActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
+import com.pixled.pixledandroid.deviceGroup.editActivity.EditGroupActivity;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
 import com.pixled.pixledserver.core.device.base.Device;
@@ -115,6 +117,16 @@ public class GroupViewFragment extends Fragment {
         // Synchronize index
         ((GroupSelectionActivity) getActivity()).getDeviceAdapterIndex().put(groupId, deviceAdapter);
 
+        // Set up edit button
+        rootView.findViewById(R.id.editButton).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        launchEditGroup();
+                    }
+                }
+        );
+
         // Fetch lights from the server, feeding the recycler view.
         fetchDevices();
 
@@ -179,6 +191,12 @@ public class GroupViewFragment extends Fragment {
 
             }
         });
+    }
+
+    public void launchEditGroup() {
+        Intent intent = new Intent(getActivity(), EditGroupActivity.class);
+        intent.putExtra("groupId", groupId);
+        startActivity(intent);
     }
 
     public DeviceAdapter getDeviceAdapter() {
