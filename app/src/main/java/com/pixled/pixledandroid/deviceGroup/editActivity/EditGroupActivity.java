@@ -1,15 +1,19 @@
 package com.pixled.pixledandroid.deviceGroup.editActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceService;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupService;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.device.base.Device;
@@ -31,9 +35,13 @@ public class EditGroupActivity extends AppCompatActivity  {
     private EditText editName;
     private List<Device> availableDevices;
     private List<Device> inGroupDevices;
+    private Button doneButton;
 
     private DeviceListAdapter availableDevicesAdapter;
     private DeviceListAdapter inGroupDevicesAdapter;
+
+    // DTO of the device group that correspond to this view.
+    private DeviceGroupDto deviceGroupDto;
 
     public EditGroupActivity() {
         availableDevices = new ArrayList<>();
@@ -47,6 +55,13 @@ public class EditGroupActivity extends AppCompatActivity  {
         setContentView(R.layout.edit_group_view);
 
         editName = findViewById(R.id.editName);
+        doneButton = findViewById(R.id.doneButton);
+        doneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateGroup();
+            }
+        });
 
         groupId = getIntent().getExtras().getInt("groupId");
 
@@ -83,10 +98,10 @@ public class EditGroupActivity extends AppCompatActivity  {
 
             @Override
             public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
-                DeviceGroupDto device = response.body();
+                deviceGroupDto = response.body();
 
                 Log.i("RETROFIT",  "Device " + String.valueOf(groupId) + " fetched.");
-                editName.setText(device.getName());
+                editName.setText(deviceGroupDto.getName());
 
                 // Once group info has been loaded, fetch ALL devices.
                 fetchAvailableDevices();
@@ -127,7 +142,6 @@ public class EditGroupActivity extends AppCompatActivity  {
     private void fetchGroupDevices() {
         GroupService buildingService = new Retrofit.Builder()
                 .baseUrl(ServerConfig.ENDPOINT)
-                // .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().enableDefaultTyping()))
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(GroupService.class);
@@ -172,5 +186,37 @@ public class EditGroupActivity extends AppCompatActivity  {
         inGroupDevices.remove(device);
         availableDevicesAdapter.notifyDataSetChanged();
         inGroupDevicesAdapter.notifyDataSetChanged();
+    }
+
+    public void updateGroup() {
+        deviceGroupDto.setName(editName.getText().toString());
+        ArrayList<Integer> devices = new ArrayList<>();
+        for (Device d : inGroupDevices) {
+            devices.add(d.getId());
+        }
+        deviceGroupDto.setDevices(devices);
+
+        GroupService buildingService = new Retrofit.Builder()
+                .baseUrl(ServerConfig.ENDPOINT)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build()
+                .create(GroupService.class);
+
+        Activity thisActivity = this;
+
+        buildingService.updateGroup(groupId, deviceGroupDto).enqueue(new Callback<DeviceGroupDto>() {
+
+            @Override
+            public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
+                Log.i("RETROFIT", "Group " + deviceGroupDto.getName() + " updated.");
+                Intent intent = new Intent(thisActivity, GroupSelectionActivity.class);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onFailure(Call<DeviceGroupDto> call, Throwable t) {
+                Log.e("RETROFIT","Retrofit error : " + t);
+            }
+        });
     }
 }
