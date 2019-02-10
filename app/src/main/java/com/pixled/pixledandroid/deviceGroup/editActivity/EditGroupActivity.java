@@ -1,15 +1,18 @@
 package com.pixled.pixledandroid.deviceGroup.editActivity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceService;
@@ -18,6 +21,7 @@ import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupService;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.device.base.Device;
 import com.pixled.pixledserver.core.device.base.DeviceDto;
+import com.pixled.pixledserver.core.group.DeviceGroup;
 import com.pixled.pixledserver.core.group.DeviceGroupDto;
 
 import java.util.ArrayList;
@@ -30,6 +34,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class EditGroupActivity extends AppCompatActivity  {
+
+    private enum Mode {EDIT, NEW};
+
+    private Mode mode;
 
     private int groupId;
     private EditText editName;
@@ -59,11 +67,32 @@ public class EditGroupActivity extends AppCompatActivity  {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateGroup();
+                switch(mode){
+                    case NEW:
+                        createGroup();
+                        break;
+                    case EDIT:
+                        updateGroup();
+                        break;
+                }
             }
         });
 
-        groupId = getIntent().getExtras().getInt("groupId");
+        if (getIntent().getExtras() != null) {
+            groupId = getIntent().getExtras().getInt("groupId", -1);
+            if (groupId == -1) {
+                // No group id was provided, so we want to create a new group.
+                mode = Mode.NEW;
+                ((Toolbar) findViewById(R.id.editToolbar)).setTitle(R.string.new_group);
+            } else {
+                mode = Mode.EDIT;
+                ((Toolbar) findViewById(R.id.editToolbar)).setTitle(R.string.edit_group);
+            }
+        }
+        else {
+            mode = Mode.NEW;
+            ((Toolbar) findViewById(R.id.editToolbar)).setTitle(R.string.new_group);
+        }
 
         // The recycler view (aka a list) in which available devices will be displayed
         RecyclerView availableDevicesRecyclerView = findViewById(R.id.available_devices_list);
@@ -81,15 +110,19 @@ public class EditGroupActivity extends AppCompatActivity  {
         inGroupDevicesAdapter = new DeviceListAdapter(inGroupDevices, DeviceListViewHolder.Mode.IN_GROUP, this);
         inGroupDevicesRecyclerView.setAdapter(inGroupDevicesAdapter);
 
-
-        fetchGroup();
+        if (mode == Mode.EDIT) {
+            fetchGroup();
+        }
+        else {
+            deviceGroupDto = new DeviceGroupDto(new DeviceGroup());
+            fetchAvailableDevices();
+        }
 
     }
 
     private void fetchGroup() {
         GroupService groupService = new Retrofit.Builder()
                 .baseUrl(ServerConfig.ENDPOINT)
-                // .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().enableDefaultTyping()))
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(GroupService.class);
@@ -116,47 +149,24 @@ public class EditGroupActivity extends AppCompatActivity  {
 
     private void fetchAvailableDevices() {
         DeviceService deviceService = new Retrofit.Builder()
-                .baseUrl(ServerConfig.ENDPOINT)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build()
-                .create(DeviceService.class);
+            .baseUrl(ServerConfig.ENDPOINT)
+            .addConverterFactory(JacksonConverterFactory.create())
+            .build()
+            .create(DeviceService.class);
 
         deviceService.listDevices().enqueue(new Callback<List<DeviceDto>>() {
             @Override
             public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
                 for(DeviceDto d : response.body()) {
-                    availableDevices.add(d.generateDevice());
+                    if (deviceGroupDto.getDevices().contains(d.getId())){
+                        inGroupDevices.add(d.generateDevice());
+                    }
+                    else {
+                        availableDevices.add(d.generateDevice());
+                    }
                 }
+                inGroupDevicesAdapter.notifyDataSetChanged();
                 availableDevicesAdapter.notifyDataSetChanged();
-                // Once all devices has been fetched, fetch devices that belong to this group.
-                fetchGroupDevices();
-            }
-
-            @Override
-            public void onFailure(Call<List<DeviceDto>> call, Throwable t) {
-                Log.e("RETROFIT","Retrofit error : " + t);
-            }
-        });
-    }
-
-    private void fetchGroupDevices() {
-        GroupService buildingService = new Retrofit.Builder()
-                .baseUrl(ServerConfig.ENDPOINT)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build()
-                .create(GroupService.class);
-
-        buildingService.listGroupDevices(groupId).enqueue(new Callback<List<DeviceDto>>() {
-
-            @Override
-            public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
-                List<DeviceDto> list = response.body();
-
-                Log.i("RETROFIT", list.size() + " devices fetched.");
-                for (DeviceDto d : list) {
-                    Device device = d.generateDevice();
-                    addToGroup(device);
-                }
             }
 
             @Override
@@ -188,6 +198,44 @@ public class EditGroupActivity extends AppCompatActivity  {
         inGroupDevicesAdapter.notifyDataSetChanged();
     }
 
+    public void createGroup() {
+        deviceGroupDto.setName(editName.getText().toString());
+        ArrayList<Integer> devices = new ArrayList<>();
+        for (Device d : inGroupDevices) {
+            devices.add(d.getId());
+        }
+        deviceGroupDto.setDevices(devices);
+
+        GroupService buildingService = new Retrofit.Builder()
+                .baseUrl(ServerConfig.ENDPOINT)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build()
+                .create(GroupService.class);
+
+        Activity thisActivity = this;
+
+        buildingService.createGroup(deviceGroupDto).enqueue(new Callback<DeviceGroupDto>() {
+
+            @Override
+            public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
+                Log.i("RETROFIT", "Group " + deviceGroupDto.getName() + " created.");
+                Intent intent = new Intent(thisActivity, GroupSelectionActivity.class);
+                startActivity(intent);
+                Context context = getApplicationContext();
+                CharSequence text = "Group " + deviceGroupDto.getName() + " created.";
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+
+            @Override
+            public void onFailure(Call<DeviceGroupDto> call, Throwable t) {
+                Log.e("RETROFIT","Retrofit error : " + t);
+            }
+        });
+    }
+
     public void updateGroup() {
         deviceGroupDto.setName(editName.getText().toString());
         ArrayList<Integer> devices = new ArrayList<>();
@@ -211,6 +259,12 @@ public class EditGroupActivity extends AppCompatActivity  {
                 Log.i("RETROFIT", "Group " + deviceGroupDto.getName() + " updated.");
                 Intent intent = new Intent(thisActivity, GroupSelectionActivity.class);
                 startActivity(intent);
+                Context context = getApplicationContext();
+                CharSequence text = "Group " + deviceGroupDto.getName() + " updated.";
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             }
 
             @Override

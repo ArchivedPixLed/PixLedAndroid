@@ -27,4 +27,5 @@
     <string name="devices_in_group">Devices In Group :</string>
     <string name="available_devices">Available Devices :</string>
     <string name="all_devices_in_group">All devices are currently in this group!</string>
+    <string name="new_group">New Group</string>
 </resources>

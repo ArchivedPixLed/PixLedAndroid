@@ -33,7 +33,7 @@
             app:tabMode="scrollable" />
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/new_group_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="3dp"

@@ -1,6 +1,7 @@
 package com.pixled.pixledandroid.deviceGroup.mainActivity;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceService;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
+import com.pixled.pixledandroid.deviceGroup.editActivity.EditGroupActivity;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledandroid.welcome.WelcomeActivity;
@@ -53,13 +55,14 @@ public class GroupSelectionActivity extends AppCompatActivity {
     private ViewPager groupPager;
     private PagerAdapter groupPagerAdapter;
 
-    // private ActionBar.TabListener tabListener;
+    /*
+    Tabs and toolbar
+     */
     private TabLayout tabLayout;
     private Toolbar toolbar;
     private LinearLayout tabView;
+    private Button newGroupButton;
 
-    // private long buildingId;
-    // private String buildingName;
     private List<DeviceGroup> groups = new ArrayList<>();
 
     /*
@@ -165,8 +168,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
         });
 
         final DeviceService deviceService = new Retrofit.Builder()
-                .baseUrl(ServerConfig
-                        .ENDPOINT)
+                .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
                 .create(DeviceService.class);
@@ -179,6 +181,14 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 publishColorChanged(deviceService, selectedDevice);
             }
         });
+
+        findViewById(R.id.new_group_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchNewGroup();
+            }
+        });
+
 
         // Set up MQTT
         ((MqttAndroidConnectionImpl) WelcomeActivity.mqttAndroidConnection).setGroupSelectionActivity(this);
@@ -287,6 +297,11 @@ public class GroupSelectionActivity extends AppCompatActivity {
         groupPager.setVisibility(View.VISIBLE);
         tabView.setVisibility(View.VISIBLE);
         toolbar.setTitle("Available Devices");
+    }
+
+    private void launchNewGroup() {
+        Intent intent = new Intent(this, EditGroupActivity.class);
+        startActivity(intent);
     }
 
 

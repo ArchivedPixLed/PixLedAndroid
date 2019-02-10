@@ -193,7 +193,7 @@ public class GroupViewFragment extends Fragment {
         });
     }
 
-    public void launchEditGroup() {
+    private void launchEditGroup() {
         Intent intent = new Intent(getActivity(), EditGroupActivity.class);
         intent.putExtra("groupId", groupId);
         startActivity(intent);

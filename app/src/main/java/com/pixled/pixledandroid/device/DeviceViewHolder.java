@@ -32,7 +32,7 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
      */
     private Device device;
 
-    private TextView deviceId;
+    private TextView deviceName;
     private Switch deviceSwitch;
     private Button changeColorButton;
     private TextView connectedTextView;
@@ -52,7 +52,7 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         this.groupViewFragment = roomViewFragment;
 
         // Light id view
-        deviceId = itemView.findViewById(R.id.deviceId);
+        deviceName = itemView.findViewById(R.id.deviceName);
 
         // Connected TextView
         connectedTextView = itemView.findViewById(R.id.connected);
@@ -134,7 +134,12 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         // Used to synchronized the view with informations contained in the corresponding
         // Light instance.
         this.device = device;
-        deviceId.setText((Long.valueOf(device.getId())).toString());
+        if (device.getName().length() > 0) {
+            deviceName.setText(device.getName());
+        }
+        else {
+            deviceName.setText("Device " + Long.valueOf(device.getId()));
+        }
         deviceSwitch.setChecked(device.getDeviceState().getToggleState() == ToggleState.ON);
         connectedTextView.setText(device.getDeviceState().isConnected() ? "connected" : "disconnected");
 

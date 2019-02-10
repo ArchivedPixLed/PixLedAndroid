@@ -8,6 +8,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
@@ -27,5 +28,8 @@ public interface GroupService {
 
     @PUT("groups/{id}")
     Call<DeviceGroupDto> updateGroup(@Path("id") int id, @Body DeviceGroupDto deviceGroupDto);
+
+    @POST("groups")
+    Call<DeviceGroupDto> createGroup(@Body DeviceGroupDto deviceGroupDto);
 
 }
