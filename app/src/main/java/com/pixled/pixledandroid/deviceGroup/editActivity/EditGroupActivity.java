@@ -9,6 +9,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,10 +37,11 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class EditGroupActivity extends AppCompatActivity  {
 
-    private enum Mode {EDIT, NEW};
+    private enum Mode {EDIT, NEW}
 
     private Mode mode;
 
+    private Toolbar toolbar;
     private int groupId;
     private EditText editName;
     private List<Device> availableDevices;
@@ -54,6 +57,13 @@ public class EditGroupActivity extends AppCompatActivity  {
     public EditGroupActivity() {
         availableDevices = new ArrayList<>();
         inGroupDevices = new ArrayList<>();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.group_menu, menu);
+        return true;
     }
 
     @Override
@@ -78,20 +88,23 @@ public class EditGroupActivity extends AppCompatActivity  {
             }
         });
 
+        toolbar = findViewById(R.id.editToolbar);
+
         if (getIntent().getExtras() != null) {
             groupId = getIntent().getExtras().getInt("groupId", -1);
             if (groupId == -1) {
                 // No group id was provided, so we want to create a new group.
                 mode = Mode.NEW;
-                ((Toolbar) findViewById(R.id.editToolbar)).setTitle(R.string.new_group);
+                toolbar.setTitle(R.string.new_group);
             } else {
                 mode = Mode.EDIT;
-                ((Toolbar) findViewById(R.id.editToolbar)).setTitle(R.string.edit_group);
+                toolbar.setTitle(R.string.edit_group);
+                toolbar.inflateMenu(R.menu.group_menu);
             }
         }
         else {
             mode = Mode.NEW;
-            ((Toolbar) findViewById(R.id.editToolbar)).setTitle(R.string.new_group);
+            toolbar.setTitle(R.string.new_group);
         }
 
         // The recycler view (aka a list) in which available devices will be displayed

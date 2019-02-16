@@ -22,14 +22,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
 
     private List<Device> deviceList;
     private List<DeviceViewHolder> deviceViews;
-    private GroupViewFragment groupViewFragment;
 
     private boolean enableColorButton;
 
-    public DeviceAdapter(List<Device> deviceList, GroupViewFragment groupViewFragment, boolean enableColorButton) {
+    private GroupSelectionActivity groupSelectionActivity;
+
+    public DeviceAdapter(List<Device> deviceList, GroupSelectionActivity groupSelectionActivity, boolean enableColorButton) {
         this.deviceList = deviceList;
         deviceViews = new ArrayList<>();
-        this.groupViewFragment = groupViewFragment;
+        this.groupSelectionActivity = groupSelectionActivity;
         this.enableColorButton = enableColorButton;
     }
 
@@ -39,7 +40,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
     @Override
     public DeviceViewHolder onCreateViewHolder(ViewGroup viewGroup, int itemType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.device_card_view,viewGroup,false);
-        DeviceViewHolder newdeviceView = new DeviceViewHolder(view, groupViewFragment, enableColorButton);
+        DeviceViewHolder newdeviceView = new DeviceViewHolder(view, groupSelectionActivity, enableColorButton);
         deviceViews.add(newdeviceView);
         return newdeviceView;
     }
@@ -50,7 +51,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
     @Override
     public void onBindViewHolder(DeviceViewHolder deviceViewHolder, int position) {
         Device device = deviceList.get(position);
-        ((GroupSelectionActivity) groupViewFragment.getActivity()).getDeviceViewsIndex().put(device.getId(), deviceViewHolder);
+        groupSelectionActivity.getDeviceViewsIndex().put(device.getId(), deviceViewHolder);
         deviceViewHolder.bind(device);
     }
 

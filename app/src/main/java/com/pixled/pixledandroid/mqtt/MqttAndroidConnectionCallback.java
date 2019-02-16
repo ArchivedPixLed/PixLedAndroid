@@ -14,11 +14,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
 
-    private GroupSelectionActivity roomSelectionActivity;
+    private GroupSelectionActivity groupSelectionActivity;
     private MqttAndroidClient mqttAndroidClient;
 
-    public MqttAndroidConnectionCallback(GroupSelectionActivity roomSelectionActivity, MqttAndroidClient mqttAndroidClient) {
-        this.roomSelectionActivity = roomSelectionActivity;
+    public MqttAndroidConnectionCallback(GroupSelectionActivity groupSelectionActivity, MqttAndroidClient mqttAndroidClient) {
+        this.groupSelectionActivity = groupSelectionActivity;
         this.mqttAndroidClient = mqttAndroidClient;
     }
 
@@ -31,12 +31,12 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         Long id = Long.valueOf(message.toString());
         Log.i("MQTT","Light " + id + " : " + topic);
-        if (roomSelectionActivity != null) {
-            DeviceViewHolder deviceView = roomSelectionActivity.getDeviceViewsIndex().get(id);
+        if (groupSelectionActivity != null) {
+            DeviceViewHolder deviceView = groupSelectionActivity.getDeviceViewsIndex().get(id);
         /*
         TODO: Handle multiple groups
          */
-            DeviceAdapter deviceAdapter = roomSelectionActivity.getDeviceAdapterIndex().get(deviceView.getDevice().getDeviceGroups().get(0).getId());
+            DeviceAdapter deviceAdapter = groupSelectionActivity.getViewFragmentIndex().get(deviceView.getDevice().getDeviceGroups().get(0).getId()).getDeviceAdapter();
             if (deviceView != null) {
                 if (topic.equals(MqttAndroidConnection.connected_topic)) {
                     deviceView.getDevice().getDeviceState().setConnected(true);

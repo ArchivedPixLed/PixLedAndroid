@@ -20,6 +20,7 @@ import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
 import com.pixled.pixledserver.core.device.base.Device;
 import com.pixled.pixledserver.core.device.base.DeviceDto;
+import com.pixled.pixledserver.core.group.DeviceGroup;
 import com.pixled.pixledserver.core.group.DeviceGroupDto;
 
 import java.util.ArrayList;
@@ -38,27 +39,43 @@ public class GroupViewFragment extends Fragment {
      */
 
     private static final String TAG = "GROUP_PAGE";
+    // Id of the group
     private int groupId;
-    private List<Device> deviceList = new ArrayList<>();
+    // List of devices that belong to this group
+    private DeviceGroup deviceGroup;
 
+    // Adapter used to render device list
     private DeviceAdapter deviceAdapter;
 
+    // Labels and controls (group level)
     private TextView deviceNumberTextView;
     private int deviceNumber = 0;
     private Switch groupSwitch;
 
+    // Group selection activity (used to access indexes)
+    private GroupSelectionActivity groupSelectionActivity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         ViewGroup rootView = (ViewGroup) inflater.inflate(
                 R.layout.group_page, container, false);
+
+        // Parent activity
+        groupSelectionActivity = (GroupSelectionActivity) getActivity();
+
+        // Retrieve the id of the group corresponding to this view
+        groupId = getArguments().getInt("groupId");
+
+        // Retrieve device group from groupSelectionActivity
+        deviceGroup = groupSelectionActivity.getDeviceGroupsIndex().get(groupId);
 
         /*
         Used to show the number of available rooms at the top of the view.
          */
         deviceNumberTextView = rootView.findViewById(R.id.deviceCount);
-        deviceNumberTextView.setText("0");
+        updateDeviceNumber();
 
         /*
         The button to switch a whole room.
@@ -69,24 +86,28 @@ public class GroupViewFragment extends Fragment {
         groupSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GroupService roomService = new Retrofit.Builder()
+                GroupService groupService = new Retrofit.Builder()
                         .baseUrl(ServerConfig.ENDPOINT)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build()
                         .create(GroupService.class);
 
-                roomService.switchGroup(groupId).enqueue(new Callback<List<DeviceDto>>() {
+                groupService.switchGroup(groupId).enqueue(new Callback<List<DeviceDto>>() {
                     @Override
                     public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
-                        // Synchronize each light status
-                        HashMap<Integer, ToggleState> newDeviceStatus = new HashMap<>();
-                        for (DeviceDto device : response.body()) {
-                            newDeviceStatus.put(device.getId(), device.getState().getToggle());
-                        }
-                        for (DeviceViewHolder deviceView : deviceAdapter.getDeviceViews()) {
-                            Device viewDevice = deviceView.getDevice();
-                            viewDevice.getDeviceState().setToggleState(newDeviceStatus.get(viewDevice.getId()));
-                            deviceAdapter.notifyItemChanged(deviceView.getAdapterPosition());
+
+                        // The switch ha succeeded, so we switch there to.
+                        // Notice that switchGroup() is the same function has used on server side,
+                        // from the pixledserver-core library
+                        deviceGroup.switchGroup();
+
+                        // Update all the group views potentially concerned
+                        for (Device d : deviceGroup.getDevices()) {
+                            for (DeviceGroup dg : d.getDeviceGroups()) {
+                                GroupViewFragment groupViewFragment = groupSelectionActivity.getViewFragmentIndex().get(dg.getId());
+                                groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
+                                groupViewFragment.updateDeviceGroupState();
+                            }
                         }
                     }
 
@@ -103,19 +124,16 @@ public class GroupViewFragment extends Fragment {
         // Init button status
         groupSwitch.setChecked(getArguments().getString("groupStatus").equals("ON"));
 
-        // Retrieve the id of the group corresponding to this view
-        groupId = getArguments().getInt("groupId");
-
         // The recycler view (aka a list) in which lights will be displayed
         RecyclerView recyclerView = rootView.findViewById(R.id.deviceList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        deviceAdapter = new DeviceAdapter(deviceList, this, true);
+        deviceAdapter = new DeviceAdapter(deviceGroup.getDevices(), groupSelectionActivity, true);
         recyclerView.setAdapter(deviceAdapter);
 
         // Synchronize index
-        ((GroupSelectionActivity) getActivity()).getDeviceAdapterIndex().put(groupId, deviceAdapter);
+        groupSelectionActivity.getViewFragmentIndex().put(groupId, this);
 
         // Set up edit button
         rootView.findViewById(R.id.editButton).setOnClickListener(
@@ -127,71 +145,84 @@ public class GroupViewFragment extends Fragment {
                 }
         );
 
-        // Fetch lights from the server, feeding the recycler view.
-        fetchDevices();
-
         return rootView;
     }
 
-    private void fetchDevices() {
-        GroupService buildingService = new Retrofit.Builder()
-                .baseUrl(ServerConfig.ENDPOINT)
-                // .addConverterFactory(JacksonConverterFactory.create(new ObjectMapper().enableDefaultTyping()))
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build()
-                .create(GroupService.class);
+//    private void fetchGroup() {
+//        GroupService groupService = new Retrofit.Builder()
+//                .baseUrl(ServerConfig.ENDPOINT)
+//                .addConverterFactory(JacksonConverterFactory.create())
+//                .build()
+//                .create(GroupService.class);
+//        groupService.getGroup(groupId).enqueue(new Callback<DeviceGroupDto>() {
+//            @Override
+//            public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
+//                Log.i("RETROFIT", "Group " + String.valueOf(groupId) + " fetched.");
+//                deviceGroup = new DeviceGroup(response.body());
+//                fetchDevices(groupService);
+//            }
+//
+//            @Override
+//            public void onFailure(Call<DeviceGroupDto> call, Throwable t) {
+//
+//            }
+//        });
+//    }
 
-        buildingService.listGroupDevices(groupId).enqueue(new Callback<List<DeviceDto>>() {
+//    private void fetchDevices(GroupService groupService) {
+//
+//        groupService.listGroupDevices(groupId).enqueue(new Callback<List<DeviceDto>>() {
+//
+//            @Override
+//            public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
+//                List<DeviceDto> list = response.body();
+//
+//                Log.i("RETROFIT", deviceList.size() + " devices fetched.");
+//                for (DeviceDto d : list) {
+//                    Log.i("RETROFIT","Device : " + d.getId());
+//                    deviceList.add(d.generateDevice());
+//                    // Update the recycler view
+//                    deviceAdapter.notifyItemInserted(deviceList.size() - 1);
+//
+//                    // Update light number
+//                    deviceNumber++;
+//                    deviceNumberTextView.setText(String.valueOf(deviceNumber));
+//                }
+//                deviceGroup.setDevices(deviceList);
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<DeviceDto>> call, Throwable t) {
+//                Log.e("RETROFIT","Retrofit error : " + t);
+//            }
+//        });
+//    }
 
-            @Override
-            public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
-                List<DeviceDto> list = response.body();
-
-                Log.i("RETROFIT", deviceList.size() + " devices fetched.");
-                for (DeviceDto d : list) {
-                    Log.i("RETROFIT","Device : " + d.getId());
-                    deviceList.add(d.generateDevice());
-                    // Update the recycler view
-                    deviceAdapter.notifyItemInserted(deviceList.size() - 1);
-
-                    // Update light number
-                    deviceNumber++;
-                    deviceNumberTextView.setText(String.valueOf(deviceNumber));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<DeviceDto>> call, Throwable t) {
-                Log.e("RETROFIT","Retrofit error : " + t);
-            }
-        });
-    }
-
-    public void updateGroupStatus() {
-        /*
-        Used when room are switched, to keep room status synchronized.
-        For example when all lights are switched off, the room status must be set to off.
-        Notice that room status is kept consistent from the server side, this function just
-        fetch each time the room status to keep it synchonized.
-        */
-        GroupService roomService = new Retrofit.Builder()
-                .baseUrl(ServerConfig.ENDPOINT)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build()
-                .create(GroupService.class);
-
-        roomService.getGroup(groupId).enqueue(new Callback<DeviceGroupDto>() {
-            @Override
-            public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
-                groupSwitch.setChecked(response.body().getState().getToggle() == ToggleState.ON);
-            }
-
-            @Override
-            public void onFailure(Call<DeviceGroupDto> call, Throwable t) {
-
-            }
-        });
-    }
+//    public void updateGroupStatus() {
+//        /*
+//        Used when room are switched, to keep room status synchronized.
+//        For example when all lights are switched off, the room status must be set to off.
+//        Notice that room status is kept consistent from the server side, this function just
+//        fetch each time the room status to keep it synchronized.
+//        */
+//        GroupService roomService = new Retrofit.Builder()
+//                .baseUrl(ServerConfig.ENDPOINT)
+//                .addConverterFactory(JacksonConverterFactory.create())
+//                .build()
+//                .create(GroupService.class);
+//
+//        roomService.getGroup(groupId).enqueue(new Callback<DeviceGroupDto>() {
+//            @Override
+//            public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
+//                groupSwitch.setChecked(response.body().getState().getToggle() == ToggleState.ON);
+//            }
+//
+//            @Override
+//            public void onFailure(Call<DeviceGroupDto> call, Throwable t) {
+//
+//            }
+//        });
+//    }
 
     private void launchEditGroup() {
         Intent intent = new Intent(getActivity(), EditGroupActivity.class);
@@ -199,8 +230,20 @@ public class GroupViewFragment extends Fragment {
         startActivity(intent);
     }
 
+    public void updateDeviceNumber() {
+        deviceNumber = deviceGroup.getDevices().size();
+        deviceNumberTextView.setText(String.valueOf(deviceNumber));
+    }
+
+    public void updateDeviceGroupState() {
+        groupSwitch.setChecked(deviceGroup.getDeviceGroupState().getToggleState() == ToggleState.ON);
+    }
+
     public DeviceAdapter getDeviceAdapter() {
         return deviceAdapter;
     }
 
+    public GroupSelectionActivity getGroupSelectionActivity() {
+        return groupSelectionActivity;
+    }
 }

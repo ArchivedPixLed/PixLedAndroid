@@ -18,6 +18,7 @@ import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
 import com.pixled.pixledserver.core.device.base.Device;
 import com.pixled.pixledserver.core.device.base.DeviceDto;
+import com.pixled.pixledserver.core.group.DeviceGroup;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,15 +42,15 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
     // Card view associated to this view
     private CardView rootCardView;
 
-    private GroupViewFragment groupViewFragment;
+    private GroupSelectionActivity groupSelectionActivity;
 
     public DeviceViewHolder(final View itemView,
-                            final GroupViewFragment roomViewFragment,
+                            final GroupSelectionActivity groupSelectionActivity,
                             boolean enableColorButton) {
         super(itemView);
         rootCardView = itemView.findViewById(R.id.rootCardView);
 
-        this.groupViewFragment = roomViewFragment;
+        this.groupSelectionActivity = groupSelectionActivity;
 
         // Light id view
         deviceName = itemView.findViewById(R.id.deviceName);
@@ -72,8 +73,14 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                     @Override
                     public void onResponse(Call<DeviceDto> call, Response<DeviceDto> response) {
                         device.switchDevice();
-                        // Update room status according to the current lights setup
-                        roomViewFragment.updateGroupStatus();
+
+                        // Update views in all the group views potentially concerned
+                        for (DeviceGroup dg : device.getDeviceGroups()) {
+                            GroupViewFragment groupViewFragment = groupSelectionActivity.getViewFragmentIndex().get(dg.getId());
+                            groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
+                            groupViewFragment.updateDeviceGroupState();
+
+                        }
                     }
 
                     @Override
@@ -93,13 +100,12 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
             changeColorButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((GroupSelectionActivity) roomViewFragment.getActivity())
-                            .showChangeColor(device, thisLightViewHolder);
+                    groupSelectionActivity.showChangeColor(device, thisLightViewHolder);
                 }
             });
         }
 
-        // Instanciating a light service
+        // Instanciating a device service
         final DeviceService deviceService = new Retrofit.Builder()
                 .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -144,12 +150,12 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         connectedTextView.setText(device.getDeviceState().isConnected() ? "connected" : "disconnected");
 
         connectedTextView.setTextColor(device.getDeviceState().isConnected() ?
-                groupViewFragment.getActivity().getResources().getColor(R.color.device_connected) :
-                groupViewFragment.getActivity().getResources().getColor(R.color.device_disconnected));
+                groupSelectionActivity.getResources().getColor(R.color.device_connected) :
+                groupSelectionActivity.getResources().getColor(R.color.device_disconnected));
 
         rootCardView.setCardBackgroundColor(device.getDeviceState().isConnected() ?
-                groupViewFragment.getActivity().getResources().getColor(R.color.card_view_background) :
-                groupViewFragment.getActivity().getResources().getColor(R.color.disconnected_background));
+                groupSelectionActivity.getResources().getColor(R.color.card_view_background) :
+                groupSelectionActivity.getResources().getColor(R.color.disconnected_background));
 
 
         float[] hsv = {
@@ -176,7 +182,4 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         return device;
     }
 
-    public GroupViewFragment getGroupViewFragment() {
-        return groupViewFragment;
-    }
 }

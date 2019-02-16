@@ -24,6 +24,7 @@ import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceService;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
+import com.pixled.pixledandroid.deviceGroup.editActivity.DeviceListAdapter;
 import com.pixled.pixledandroid.deviceGroup.editActivity.EditGroupActivity;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
 import com.pixled.pixledandroid.utils.ServerConfig;
@@ -63,8 +64,6 @@ public class GroupSelectionActivity extends AppCompatActivity {
     private LinearLayout tabView;
     private Button newGroupButton;
 
-    private List<DeviceGroup> groups = new ArrayList<>();
-
     /*
     Change color setup
      */
@@ -77,12 +76,16 @@ public class GroupSelectionActivity extends AppCompatActivity {
     // The adapter of RecyclerView displayed above the color picker
     private DeviceAdapter colorChangeDeviceAdapter;
 
+    // Groups list
+    private List<DeviceGroup> deviceGroups = new ArrayList<>();
+    // Groups index (used to retrieve groups from GroupViewFragments)
+    private Map<Integer, DeviceGroup> deviceGroupsIndex = new HashMap<>();
 
-    // Map light ids to their lightViews
+    // Map device ids to their lightViews
     private Map<Integer, DeviceViewHolder> deviceViewsIndex = new HashMap<>();
 
-    // Map room id to the adapter containing its lights
-    private Map<Integer, DeviceAdapter> deviceAdapterIndex = new HashMap<>();
+    // Map group ids to their page fragment
+    private Map<Integer, GroupViewFragment> viewFragmentIndex = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,9 +102,8 @@ public class GroupSelectionActivity extends AppCompatActivity {
 
         // Instantiate a ViewPager and a PagerAdapter.
         groupPager = findViewById(R.id.group_pager);
-        groupPagerAdapter = new GroupPagerAdapter(getSupportFragmentManager(), groups);
+        groupPagerAdapter = new GroupPagerAdapter(getSupportFragmentManager(), deviceGroups);
         groupPager.setAdapter(groupPagerAdapter);
-        // getActionBar().show();
 
         // Give the TabLayout the ViewPager
         tabLayout = findViewById(R.id.sliding_tabs);
@@ -205,7 +207,6 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 .create(GroupService.class);
 
         groupService.listGroups().enqueue(new Callback<List<DeviceGroupDto>>() {
-            ActionBar actionBar = getActionBar();
 
             @Override
             public void onResponse(Call<List<DeviceGroupDto>> call, Response<List<DeviceGroupDto>> response) {
@@ -214,13 +215,55 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 Log.i("RETROFIT", listGroups.size() + " groups fetched.");
                 for (DeviceGroupDto r : listGroups) {
                     Log.i("RETROFIT","Group : " + r.getName());
-                    groups.add(new DeviceGroup(r));
-                    groupPagerAdapter.notifyDataSetChanged();
+                    DeviceGroup deviceGroup = new DeviceGroup(r);
+                    deviceGroups.add(deviceGroup);
+                    deviceGroupsIndex.put(deviceGroup.getId(), deviceGroup);
                 }
+                groupPagerAdapter.notifyDataSetChanged();
+                fetchDevices();
             }
 
             @Override
             public void onFailure(Call<List<DeviceGroupDto>> call, Throwable t) {
+                Log.e("RETROFIT","Retrofit error : " + t);
+            }
+        });
+    }
+
+    private void fetchDevices() {
+        DeviceService deviceService = new Retrofit.Builder()
+                .baseUrl(ServerConfig.ENDPOINT)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build()
+                .create(DeviceService.class);
+
+        deviceService.listDevices().enqueue(new Callback<List<DeviceDto>>() {
+
+            @Override
+            public void onResponse(Call<List<DeviceDto>> call, Response<List<DeviceDto>> response) {
+                List<DeviceDto> list = response.body();
+
+                for (DeviceDto d : list) {
+                    Log.i("RETROFIT","Device : " + d.getId() + " " + d.getName());
+                    Device device = d.generateDevice();
+                    for (Integer i : d.getDeviceGroups()) {
+                        DeviceGroup deviceGroup = deviceGroupsIndex.get(i);
+                        device.getDeviceGroups().add(deviceGroup);
+                        deviceGroup.getDevices().add(device);
+
+                        GroupViewFragment fragment = viewFragmentIndex.get(deviceGroup.getId());
+                        if(fragment != null) {
+                            fragment.getDeviceAdapter().notifyDataSetChanged();
+                            fragment.updateDeviceNumber();
+                        }
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(Call<List<DeviceDto>> call, Throwable t) {
                 Log.e("RETROFIT","Retrofit error : " + t);
             }
         });
@@ -267,7 +310,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
 
         List<Device> deviceList = new ArrayList<>();
         deviceList.add(device);
-        colorChangeDeviceAdapter = new DeviceAdapter(deviceList, deviceViewHolder.getGroupViewFragment(), false);
+        colorChangeDeviceAdapter = new DeviceAdapter(deviceList, this, false);
         recyclerView.setAdapter(colorChangeDeviceAdapter);
 
         // getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -290,8 +333,9 @@ public class GroupSelectionActivity extends AppCompatActivity {
         // Synchronized the original light card view with the one that was displayed with the color
         // picker.
         // getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        selectedDeviceViewHolder.getGroupViewFragment().getDeviceAdapter()
-                .notifyItemChanged(selectedDeviceViewHolder.getAdapterPosition());
+        for (DeviceGroup deviceGroup : selectedDeviceViewHolder.getDevice().getDeviceGroups()) {
+            viewFragmentIndex.get(deviceGroup.getId()).getDeviceAdapter().notifyItemChanged(selectedDeviceViewHolder.getAdapterPosition());
+        }
         // Hide the change color view, show the pager view
         changeColor.setVisibility(View.INVISIBLE);
         groupPager.setVisibility(View.VISIBLE);
@@ -304,12 +348,19 @@ public class GroupSelectionActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public PagerAdapter getGroupPagerAdapter() {
+        return groupPagerAdapter;
+    }
 
     public Map<Integer, DeviceViewHolder> getDeviceViewsIndex() {
         return deviceViewsIndex;
     }
 
-    public Map<Integer, DeviceAdapter> getDeviceAdapterIndex() {
-        return deviceAdapterIndex;
+    public Map<Integer, DeviceGroup> getDeviceGroupsIndex() {
+        return deviceGroupsIndex;
+    }
+
+    public Map<Integer, GroupViewFragment> getViewFragmentIndex() {
+        return viewFragmentIndex;
     }
 }
