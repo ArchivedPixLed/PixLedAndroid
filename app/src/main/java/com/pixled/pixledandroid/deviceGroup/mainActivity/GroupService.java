@@ -7,6 +7,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -31,5 +32,8 @@ public interface GroupService {
 
     @POST("groups")
     Call<DeviceGroupDto> createGroup(@Body DeviceGroupDto deviceGroupDto);
+
+    @DELETE("groups/{id}")
+    Call<Void> deleteGroup(@Path("id") int id);
 
 }

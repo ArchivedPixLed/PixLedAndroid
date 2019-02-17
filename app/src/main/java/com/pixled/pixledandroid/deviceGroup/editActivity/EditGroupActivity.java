@@ -2,8 +2,10 @@ package com.pixled.pixledandroid.deviceGroup.editActivity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -54,6 +57,8 @@ public class EditGroupActivity extends AppCompatActivity  {
     // DTO of the device group that correspond to this view.
     private DeviceGroupDto deviceGroupDto;
 
+    private GroupSelectionActivity groupSelectionActivity;
+
     public EditGroupActivity() {
         availableDevices = new ArrayList<>();
         inGroupDevices = new ArrayList<>();
@@ -89,6 +94,7 @@ public class EditGroupActivity extends AppCompatActivity  {
         });
 
         toolbar = findViewById(R.id.editToolbar);
+        setSupportActionBar(toolbar);
 
         if (getIntent().getExtras() != null) {
             groupId = getIntent().getExtras().getInt("groupId", -1);
@@ -131,6 +137,63 @@ public class EditGroupActivity extends AppCompatActivity  {
             fetchAvailableDevices();
         }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Activity thisActivity = this;
+        switch (item.getItemId()) {
+            case R.id.delete_group:
+                // User chose the "Settings" item, show the app settings UI...
+                AlertDialog.Builder builder;
+                builder = new AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog_Alert);
+                builder.setTitle("Delete Group")
+                        .setMessage("Are you sure you want to delete this group?\n(Devices won't be deleted)")
+                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // continue with delete
+                                GroupService groupService = new Retrofit.Builder()
+                                        .baseUrl(ServerConfig.ENDPOINT)
+                                        .addConverterFactory(JacksonConverterFactory.create())
+                                        .build()
+                                        .create(GroupService.class);
+
+                                groupService.deleteGroup(deviceGroupDto.getId()).enqueue(new Callback() {
+                                    @Override
+                                    public void onResponse(Call call, Response response) {
+                                        Intent intent = new Intent(thisActivity, GroupSelectionActivity.class);
+                                        startActivity(intent);
+                                        Context context = getApplicationContext();
+                                        CharSequence text = "Group " + deviceGroupDto.getName() + " deleted.";
+                                        int duration = Toast.LENGTH_SHORT;
+
+                                        Toast toast = Toast.makeText(context, text, duration);
+                                        toast.show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call call, Throwable t) {
+
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     private void fetchGroup() {
@@ -219,7 +282,7 @@ public class EditGroupActivity extends AppCompatActivity  {
         }
         deviceGroupDto.setDevices(devices);
 
-        GroupService buildingService = new Retrofit.Builder()
+        GroupService groupService = new Retrofit.Builder()
                 .baseUrl(ServerConfig.ENDPOINT)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build()
@@ -227,7 +290,7 @@ public class EditGroupActivity extends AppCompatActivity  {
 
         Activity thisActivity = this;
 
-        buildingService.createGroup(deviceGroupDto).enqueue(new Callback<DeviceGroupDto>() {
+        groupService.createGroup(deviceGroupDto).enqueue(new Callback<DeviceGroupDto>() {
 
             @Override
             public void onResponse(Call<DeviceGroupDto> call, Response<DeviceGroupDto> response) {
