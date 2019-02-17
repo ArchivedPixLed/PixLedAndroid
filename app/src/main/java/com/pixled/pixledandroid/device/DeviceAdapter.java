@@ -51,7 +51,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
     @Override
     public void onBindViewHolder(DeviceViewHolder deviceViewHolder, int position) {
         Device device = deviceList.get(position);
-        groupSelectionActivity.getDeviceViewsIndex().put(device.getId(), deviceViewHolder);
+        groupSelectionActivity.getDeviceViewsIndex().get(device.getId()).add(deviceViewHolder);
         deviceViewHolder.bind(device);
     }
 

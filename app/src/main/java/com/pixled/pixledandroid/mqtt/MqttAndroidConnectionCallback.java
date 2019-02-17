@@ -32,19 +32,14 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
         Long id = Long.valueOf(message.toString());
         Log.i("MQTT","Light " + id + " : " + topic);
         if (groupSelectionActivity != null) {
-            DeviceViewHolder deviceView = groupSelectionActivity.getDeviceViewsIndex().get(id);
-        /*
-        TODO: Handle multiple groups
-         */
-            DeviceAdapter deviceAdapter = groupSelectionActivity.getViewFragmentIndex().get(deviceView.getDevice().getDeviceGroups().get(0).getId()).getDeviceAdapter();
-            if (deviceView != null) {
+            for (DeviceViewHolder deviceView : groupSelectionActivity.getDeviceViewsIndex().get(id)) {
                 if (topic.equals(MqttAndroidConnection.connected_topic)) {
                     deviceView.getDevice().getDeviceState().setConnected(true);
 
                 } else if (topic.equals(MqttAndroidConnection.disconnected_topic)) {
                     deviceView.getDevice().getDeviceState().setConnected(false);
                 }
-                deviceAdapter.notifyItemChanged(deviceView.getAdapterPosition());
+                deviceView.updateConnectionStatus();
             }
         }
     }

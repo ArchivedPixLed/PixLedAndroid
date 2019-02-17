@@ -105,8 +105,12 @@ public class GroupViewFragment extends Fragment {
                         for (Device d : deviceGroup.getDevices()) {
                             for (DeviceGroup dg : d.getDeviceGroups()) {
                                 GroupViewFragment groupViewFragment = groupSelectionActivity.getViewFragmentIndex().get(dg.getId());
-                                groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
+                                // groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
                                 groupViewFragment.updateDeviceGroupState();
+                            }
+
+                            for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(d.getId())) {
+                                deviceViewHolder.updateSwitch();
                             }
                         }
                     }

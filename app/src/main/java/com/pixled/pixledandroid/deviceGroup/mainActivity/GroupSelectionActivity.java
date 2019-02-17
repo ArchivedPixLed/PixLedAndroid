@@ -82,7 +82,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
     private Map<Integer, DeviceGroup> deviceGroupsIndex = new HashMap<>();
 
     // Map device ids to their lightViews
-    private Map<Integer, DeviceViewHolder> deviceViewsIndex = new HashMap<>();
+    private Map<Integer, List<DeviceViewHolder>> deviceViewsIndex = new HashMap<>();
 
     // Map group ids to their page fragment
     private Map<Integer, GroupViewFragment> viewFragmentIndex = new HashMap<>();
@@ -246,6 +246,8 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 for (DeviceDto d : list) {
                     Log.i("RETROFIT","Device : " + d.getId() + " " + d.getName());
                     Device device = d.generateDevice();
+                    deviceViewsIndex.put(device.getId(), new ArrayList<>());
+
                     for (Integer i : d.getDeviceGroups()) {
                         DeviceGroup deviceGroup = deviceGroupsIndex.get(i);
                         device.getDeviceGroups().add(deviceGroup);
@@ -276,11 +278,8 @@ public class GroupSelectionActivity extends AppCompatActivity {
                         ((color >> 16) & 0xff) + ", " +
                         ((color >> 8) & 0xff) + ", " +
                         (color & 0xff) + ")");
-        ColorDto colorDto = new ColorDto(
-                selectedDevice.getDeviceState().getColor().getHue(),
-                selectedDevice.getDeviceState().getColor().getSaturation(),
-                selectedDevice.getDeviceState().getColor().getValue(),
-                selectedDevice.getDeviceState().getColor().getArgb());
+
+        ColorDto colorDto = new ColorDto(selectedDevice.getDeviceState().getColor());
         deviceService.changeDeviceColor(selectedDevice.getId(),
                 "application/json;charset=UTF-8",
                 colorDto)
@@ -352,7 +351,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
         return groupPagerAdapter;
     }
 
-    public Map<Integer, DeviceViewHolder> getDeviceViewsIndex() {
+    public Map<Integer, List<DeviceViewHolder>> getDeviceViewsIndex() {
         return deviceViewsIndex;
     }
 

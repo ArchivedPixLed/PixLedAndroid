@@ -20,6 +20,8 @@ import com.pixled.pixledserver.core.device.base.Device;
 import com.pixled.pixledserver.core.device.base.DeviceDto;
 import com.pixled.pixledserver.core.group.DeviceGroup;
 
+import java.util.Objects;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,9 +79,12 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                         // Update views in all the group views potentially concerned
                         for (DeviceGroup dg : device.getDeviceGroups()) {
                             GroupViewFragment groupViewFragment = groupSelectionActivity.getViewFragmentIndex().get(dg.getId());
-                            groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
+                            // groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
                             groupViewFragment.updateDeviceGroupState();
+                        }
 
+                        for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
+                            deviceViewHolder.updateSwitch();
                         }
                     }
 
@@ -118,10 +123,12 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 // set seek bar color
-                Log.i("PROGRESS BAR CHECK","Change color");
-                device.getDeviceState().getColor().setValue(((float) progress) / 100);
-                intensitySeekBar.getProgressDrawable().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.MULTIPLY);
-                intensitySeekBar.getThumb().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.SRC_ATOP);
+                if (fromUser) {
+                    // Synchronize other views
+                    for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
+                        deviceViewHolder.updateColorView(progress);
+                    }
+                }
             }
 
             @Override
@@ -170,6 +177,21 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         intensitySeekBar.setProgress((int) (device.getDeviceState().getColor().getValue() * 100));
     }
 
+    public void updateColorView(int progress) {
+        intensitySeekBar.setProgress(progress);
+        device.getDeviceState().getColor().setValue(((float) progress) / 100);
+        intensitySeekBar.getProgressDrawable().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.MULTIPLY);
+        intensitySeekBar.getThumb().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.SRC_ATOP);
+    }
+
+    public void updateConnectionStatus() {
+        connectedTextView.setText(device.getDeviceState().isConnected() ? "connected" : "disconnected");
+    }
+
+    public void updateSwitch() {
+        deviceSwitch.setChecked(device.getDeviceState().getToggleState() == ToggleState.ON);
+    }
+
     public Button getChangeColorButton() {
         return changeColorButton;
     }
@@ -181,5 +203,4 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
     public Device getDevice() {
         return device;
     }
-
 }
