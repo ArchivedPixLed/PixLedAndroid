@@ -18,11 +18,16 @@ public interface DeviceService {
     Call<List<DeviceDto>> listDevices();
 
     @PUT("devices/{id}/switch")
-    Call<DeviceDto> switchDevice(@Path("id") long idLight);
+    Call<DeviceDto> switchDevice(@Path("id") int id);
 
     // @Headers("Content-Type: text;charset=UTF-8")
     @PUT("devices/{id}/color")
-    Call<DeviceDto> changeDeviceColor(@Path("id") long idLight,
+    Call<DeviceDto> changeDeviceColor(@Path("id") int id,
                                       @Header("Content-Type") String contentType,
                                       @Body ColorDto newColor);
+
+    @PUT("devices/{id}")
+    Call<DeviceDto> updateDevice(@Path("id") int id,
+                                 @Header("Content-Type") String contentType,
+                                 @Body DeviceDto deviceDto);
 }

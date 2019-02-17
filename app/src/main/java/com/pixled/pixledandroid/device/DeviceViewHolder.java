@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -35,7 +36,7 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
      */
     private Device device;
 
-    private TextView deviceName;
+    private EditText deviceName;
     private Switch deviceSwitch;
     private Button changeColorButton;
     private TextView connectedTextView;
@@ -55,7 +56,39 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         this.groupSelectionActivity = groupSelectionActivity;
 
         // Light id view
-        deviceName = itemView.findViewById(R.id.deviceName);
+        deviceName = itemView.findViewById(R.id.nameEdit);
+        deviceName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                // When the user finishes to edit the name, the EditText lose focus
+                if(!hasFocus) {
+                    Log.i("TEST NAME", "New name : " + deviceName.getText());
+                    DeviceService deviceService = new Retrofit.Builder()
+                            .baseUrl(ServerConfig.ENDPOINT)
+                            .addConverterFactory(JacksonConverterFactory.create())
+                            .build()
+                            .create(DeviceService.class);
+                    String oldName = device.getName();
+                    device.setName(deviceName.getText().toString());
+                    deviceService.updateDevice(device.getId(),
+                            "application/json;charset=UTF-8",
+                            device.generateDto()).enqueue(
+                            new Callback<DeviceDto>() {
+                        @Override
+                        public void onResponse(Call<DeviceDto> call, Response<DeviceDto> response) {
+                            for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
+                                deviceViewHolder.updateDeviceName();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<DeviceDto> call, Throwable t) {
+                            deviceName.setText(oldName);
+                        }
+                    });
+                }
+            }
+        });
 
         // Connected TextView
         connectedTextView = itemView.findViewById(R.id.connected);
@@ -65,13 +98,13 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         deviceSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DeviceService lightService = new Retrofit.Builder()
+                DeviceService deviceService = new Retrofit.Builder()
                         .baseUrl(ServerConfig.ENDPOINT)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build()
                         .create(DeviceService.class);
 
-                lightService.switchDevice(device.getId()).enqueue(new Callback<DeviceDto>() {
+                deviceService.switchDevice(device.getId()).enqueue(new Callback<DeviceDto>() {
                     @Override
                     public void onResponse(Call<DeviceDto> call, Response<DeviceDto> response) {
                         device.switchDevice();
@@ -190,6 +223,10 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
 
     public void updateSwitch() {
         deviceSwitch.setChecked(device.getDeviceState().getToggleState() == ToggleState.ON);
+    }
+
+    public void updateDeviceName() {
+        deviceName.setText(device.getName());
     }
 
     public Button getChangeColorButton() {

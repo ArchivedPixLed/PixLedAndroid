@@ -33,20 +33,20 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:focusableInTouchMode="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="left"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/deviceName"
+                <EditText
+                    android:id="@+id/nameEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:paddingBottom="2dp"
-                    android:text="deviceId"
-                    android:textColor="@color/device_name_color"
-                    android:textSize="18sp" />
+                    android:ems="6"
+                    android:inputType="textPersonName"
+                    android:text="Name" />
 
                 <TextView
                     android:id="@+id/connected"
@@ -55,6 +55,7 @@
                     android:layout_weight="0"
                     android:text="connected"
                     android:textColor="@color/device_connected" />
+
             </LinearLayout>
 
             <LinearLayout
