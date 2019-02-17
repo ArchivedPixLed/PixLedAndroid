@@ -1,19 +1,26 @@
 package com.pixled.pixledandroid.device;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
+import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupService;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupViewFragment;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
@@ -41,6 +48,7 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
     private Button changeColorButton;
     private TextView connectedTextView;
     private SeekBar intensitySeekBar;
+    private ImageView deviceIcon;
 
     // Card view associated to this view
     private CardView rootCardView;
@@ -87,6 +95,59 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                         }
                     });
                 }
+            }
+        });
+
+        // Device Icon
+        deviceIcon = itemView.findViewById(R.id.deviceIcon);
+        deviceIcon.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder builder;
+                builder = new AlertDialog.Builder(groupSelectionActivity, R.style.Theme_AppCompat_Dialog_Alert);
+                builder.setTitle("Delete Device")
+                        .setMessage("Are you sure you want to delete this device?\n" + device.getName())
+                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // continue with delete
+                                DeviceService deviceService = new Retrofit.Builder()
+                                        .baseUrl(ServerConfig.ENDPOINT)
+                                        .addConverterFactory(JacksonConverterFactory.create())
+                                        .build()
+                                        .create(DeviceService.class);
+
+                                deviceService.deleteDevice(device.getId()).enqueue(new Callback() {
+                                    @Override
+                                    public void onResponse(Call call, Response response) {
+                                        groupSelectionActivity.getDeviceViewsIndex().remove(device.getId());
+                                        for (DeviceGroup deviceGroup : device.getDeviceGroups()) {
+                                            deviceGroup.getDevices().remove(device);
+                                            groupSelectionActivity.getViewFragmentIndex().get(deviceGroup.getId()).getDeviceAdapter().notifyDataSetChanged();
+                                        }
+
+                                        CharSequence text = "Device " + device.getName() + " deleted.";
+                                        int duration = Toast.LENGTH_SHORT;
+
+                                        Toast toast = Toast.makeText(groupSelectionActivity, text, duration);
+                                        toast.show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call call, Throwable t) {
+
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+                return false;
             }
         });
 
@@ -159,7 +220,7 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                 if (fromUser) {
                     // Synchronize other views
                     for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
-                        deviceViewHolder.updateColorView(progress);
+                        deviceViewHolder.updateColorIntensity(progress);
                     }
                 }
             }
@@ -198,19 +259,24 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                 groupSelectionActivity.getResources().getColor(R.color.disconnected_background));
 
 
-        float[] hsv = {
-                device.getDeviceState().getColor().getHue(),
-                device.getDeviceState().getColor().getSaturation(),
-                1};
-        int fullColor = Color.HSVToColor(hsv);
-        changeColorButton.setBackgroundColor(fullColor);
+        updateColorBox();
+
         int initialColor = device.getDeviceState().getColor().getArgb();
         intensitySeekBar.getProgressDrawable().setColorFilter(initialColor, PorterDuff.Mode.MULTIPLY);
         intensitySeekBar.getThumb().setColorFilter(initialColor, PorterDuff.Mode.SRC_ATOP);
         intensitySeekBar.setProgress((int) (device.getDeviceState().getColor().getValue() * 100));
     }
 
-    public void updateColorView(int progress) {
+    public void updateColorBox() {
+        float[] hsv = {
+                device.getDeviceState().getColor().getHue(),
+                device.getDeviceState().getColor().getSaturation(),
+                1};
+        int fullColor = Color.HSVToColor(hsv);
+        changeColorButton.setBackgroundColor(fullColor);
+    }
+
+    public void updateColorIntensity(int progress) {
         intensitySeekBar.setProgress(progress);
         device.getDeviceState().getColor().setValue(((float) progress) / 100);
         intensitySeekBar.getProgressDrawable().setColorFilter(device.getDeviceState().getColor().getArgb(), PorterDuff.Mode.MULTIPLY);

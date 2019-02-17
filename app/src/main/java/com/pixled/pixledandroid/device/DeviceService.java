@@ -7,6 +7,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.PUT;
@@ -30,4 +31,7 @@ public interface DeviceService {
     Call<DeviceDto> updateDevice(@Path("id") int id,
                                  @Header("Content-Type") String contentType,
                                  @Body DeviceDto deviceDto);
+
+    @DELETE("devices/{id}")
+    Call<Void> deleteDevice(@Path("id") int id);
 }

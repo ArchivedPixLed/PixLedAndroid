@@ -54,7 +54,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
     Pager setup
      */
     private ViewPager groupPager;
-    private PagerAdapter groupPagerAdapter;
+    private GroupPagerAdapter groupPagerAdapter;
 
     /*
     Tabs and toolbar
@@ -104,6 +104,22 @@ public class GroupSelectionActivity extends AppCompatActivity {
         groupPager = findViewById(R.id.group_pager);
         groupPagerAdapter = new GroupPagerAdapter(getSupportFragmentManager(), deviceGroups);
         groupPager.setAdapter(groupPagerAdapter);
+        groupPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                groupPagerAdapter.getFragmentPositionsIndex().get(i).updateDeviceGroupState();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
 
         // Give the TabLayout the ViewPager
         tabLayout = findViewById(R.id.sliding_tabs);
@@ -181,6 +197,9 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 // Publish value
                 // (Value update is done by the OnColorChangeListener)
                 publishColorChanged(deviceService, selectedDevice);
+                for (DeviceViewHolder deviceViewHolder : deviceViewsIndex.get(selectedDevice.getId())) {
+                    deviceViewHolder.updateColorBox();
+                }
             }
         });
 
@@ -349,6 +368,10 @@ public class GroupSelectionActivity extends AppCompatActivity {
 
     public PagerAdapter getGroupPagerAdapter() {
         return groupPagerAdapter;
+    }
+
+    public List<DeviceGroup> getDeviceGroups() {
+        return deviceGroups;
     }
 
     public Map<Integer, List<DeviceViewHolder>> getDeviceViewsIndex() {

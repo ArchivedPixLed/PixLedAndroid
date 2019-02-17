@@ -243,6 +243,10 @@ public class EditGroupActivity extends AppCompatActivity  {
                 }
                 inGroupDevicesAdapter.notifyDataSetChanged();
                 availableDevicesAdapter.notifyDataSetChanged();
+                if (availableDevices.size() == 0) {
+                    // All the devices was in this group before
+                    findViewById(R.id.all_devices_in_group).setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
