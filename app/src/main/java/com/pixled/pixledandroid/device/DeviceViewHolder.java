@@ -241,23 +241,16 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
         // Used to synchronized the view with informations contained in the corresponding
         // Light instance.
         this.device = device;
-        if (device.getName().length() > 0) {
+        if (device.getName() != null && device.getName().length() > 0) {
             deviceName.setText(device.getName());
         }
         else {
             deviceName.setText("Device " + Long.valueOf(device.getId()));
         }
-        deviceSwitch.setChecked(device.getDeviceState().getToggleState() == ToggleState.ON);
-        connectedTextView.setText(device.getDeviceState().isConnected() ? "connected" : "disconnected");
 
-        connectedTextView.setTextColor(device.getDeviceState().isConnected() ?
-                groupSelectionActivity.getResources().getColor(R.color.device_connected) :
-                groupSelectionActivity.getResources().getColor(R.color.device_disconnected));
+        updateSwitch();
 
-        rootCardView.setCardBackgroundColor(device.getDeviceState().isConnected() ?
-                groupSelectionActivity.getResources().getColor(R.color.card_view_background) :
-                groupSelectionActivity.getResources().getColor(R.color.disconnected_background));
-
+        updateConnectionStatus();
 
         updateColorBox();
 
@@ -285,6 +278,14 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
 
     public void updateConnectionStatus() {
         connectedTextView.setText(device.getDeviceState().isConnected() ? "connected" : "disconnected");
+
+        connectedTextView.setTextColor(device.getDeviceState().isConnected() ?
+                groupSelectionActivity.getResources().getColor(R.color.device_connected) :
+                groupSelectionActivity.getResources().getColor(R.color.device_disconnected));
+
+        rootCardView.setCardBackgroundColor(device.getDeviceState().isConnected() ?
+                groupSelectionActivity.getResources().getColor(R.color.card_view_background) :
+                groupSelectionActivity.getResources().getColor(R.color.disconnected_background));
     }
 
     public void updateSwitch() {

@@ -20,6 +20,7 @@ public class MqttAndroidConnectionImpl implements  MqttAndroidConnection {
 
     private GroupSelectionActivity groupSelectionActivity;
     private WelcomeActivity welcomeActivity;
+    private MqttAndroidConnectionCallback callback;
 
     public MqttAndroidConnectionImpl(WelcomeActivity welcomeActivity) {
         this.welcomeActivity = welcomeActivity;
@@ -27,6 +28,7 @@ public class MqttAndroidConnectionImpl implements  MqttAndroidConnection {
 
     public void setGroupSelectionActivity(GroupSelectionActivity groupSelectionActivity) {
         this.groupSelectionActivity = groupSelectionActivity;
+        callback.setGroupSelectionActivity(groupSelectionActivity);
     }
 
     @Override
@@ -35,7 +37,8 @@ public class MqttAndroidConnectionImpl implements  MqttAndroidConnection {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
         options.setConnectionTimeout(10);
-        mqttAndroidClient.setCallback(new MqttAndroidConnectionCallback(groupSelectionActivity, mqttAndroidClient));
+        callback = new MqttAndroidConnectionCallback(mqttAndroidClient);
+        mqttAndroidClient.setCallback(callback);
         Log.i("MQTT", "Connecting...");
         try {
             mqttAndroidClient.connect(options, context, new MqttConnectionStatusHandler(welcomeActivity));

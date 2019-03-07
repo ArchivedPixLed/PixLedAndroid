@@ -17,8 +17,7 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
     private GroupSelectionActivity groupSelectionActivity;
     private MqttAndroidClient mqttAndroidClient;
 
-    public MqttAndroidConnectionCallback(GroupSelectionActivity groupSelectionActivity, MqttAndroidClient mqttAndroidClient) {
-        this.groupSelectionActivity = groupSelectionActivity;
+    public MqttAndroidConnectionCallback(MqttAndroidClient mqttAndroidClient) {
         this.mqttAndroidClient = mqttAndroidClient;
     }
 
@@ -29,13 +28,12 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        Long id = Long.valueOf(message.toString());
-        Log.i("MQTT","Light " + id + " : " + topic);
+        Integer id = Integer.valueOf(message.toString());
+        Log.i("MQTT","Device " + id + " : " + topic);
         if (groupSelectionActivity != null) {
             for (DeviceViewHolder deviceView : groupSelectionActivity.getDeviceViewsIndex().get(id)) {
                 if (topic.equals(MqttAndroidConnection.connected_topic)) {
                     deviceView.getDevice().getDeviceState().setConnected(true);
-
                 } else if (topic.equals(MqttAndroidConnection.disconnected_topic)) {
                     deviceView.getDevice().getDeviceState().setConnected(false);
                 }
@@ -58,5 +56,9 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setGroupSelectionActivity(GroupSelectionActivity groupSelectionActivity) {
+        this.groupSelectionActivity = groupSelectionActivity;
     }
 }

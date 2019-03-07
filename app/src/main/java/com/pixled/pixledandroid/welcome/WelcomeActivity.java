@@ -44,11 +44,6 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setTitle(R.string.welcome);
-
-
-        // ActionBar actionBar = getActionBar();
-        // actionBar.hide();
 
         setContentView(R.layout.welcome);
 
@@ -241,6 +236,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
                 findViewById(R.id.welcomeButton).setEnabled(true);
                 startButton.getBackground().setAlpha(255);
+                launchGroupSelectionActivity();
             }
         });
     }
