@@ -12,6 +12,14 @@
         android:gravity="bottom|center_horizontal"
         android:orientation="vertical">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/welcomeToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/accent_material_device"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme" />
+
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="wrap_content"
@@ -34,7 +42,7 @@
                 android:layout_marginBottom="5dp"
                 android:text="@string/welcome_button"
                 android:textColor="@color/colorPrimaryDark"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/taskView"

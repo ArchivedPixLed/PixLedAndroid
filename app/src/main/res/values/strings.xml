@@ -30,4 +30,8 @@
     <string name="new_group">New Group</string>
     <string name="delete_group">Delete group</string>
     <string name="delete">DELETE</string>
+    <string name="set_server_ip">Set Server IP</string>
+    <string name="save_ip">Save IP</string>
+    <string name="cancel">Cancel</string>
+    <string name="set_up_ip">Enter your server IP address:</string>
 </resources>
