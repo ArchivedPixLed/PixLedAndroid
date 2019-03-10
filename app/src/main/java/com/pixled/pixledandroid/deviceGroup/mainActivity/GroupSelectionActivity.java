@@ -27,6 +27,7 @@ import com.pixled.pixledandroid.device.DeviceViewHolder;
 import com.pixled.pixledandroid.deviceGroup.editActivity.DeviceListAdapter;
 import com.pixled.pixledandroid.deviceGroup.editActivity.EditGroupActivity;
 import com.pixled.pixledandroid.mqtt.MqttAndroidConnectionImpl;
+import com.pixled.pixledandroid.utils.DeviceGroupIdPair;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledandroid.welcome.WelcomeActivity;
 import com.pixled.pixledserver.core.color.ColorDto;
@@ -81,8 +82,10 @@ public class GroupSelectionActivity extends AppCompatActivity {
     // Groups index (used to retrieve groups from GroupViewFragments)
     private Map<Integer, DeviceGroup> deviceGroupsIndex = new HashMap<>();
 
+    // Device index
+    private Map<Integer, Device> deviceIndex = new HashMap<>();
     // Map device ids to their lightViews
-    private Map<Integer, List<DeviceViewHolder>> deviceViewsIndex = new HashMap<>();
+    private Map<DeviceGroupIdPair, DeviceViewHolder> deviceViewsIndex = new HashMap<>();
 
     // Map group ids to their page fragment
     private Map<Integer, GroupViewFragment> viewFragmentIndex = new HashMap<>();
@@ -197,8 +200,11 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 // Publish value
                 // (Value update is done by the OnColorChangeListener)
                 publishColorChanged(deviceService, selectedDevice);
-                for (DeviceViewHolder deviceViewHolder : deviceViewsIndex.get(selectedDevice.getId())) {
-                    deviceViewHolder.updateColorBox();
+                for (DeviceGroup dg : selectedDevice.getDeviceGroups()) {
+                    DeviceViewHolder deviceViewHolder = deviceViewsIndex.get(new DeviceGroupIdPair(selectedDevice.getId(), dg.getId()));
+                    if (deviceViewHolder != null) {
+                        deviceViewHolder.updateColorBox();
+                    }
                 }
             }
         });
@@ -265,7 +271,8 @@ public class GroupSelectionActivity extends AppCompatActivity {
                 for (DeviceDto d : list) {
                     Log.i("RETROFIT","Device : " + d.getId() + " " + d.getName());
                     Device device = d.generateDevice();
-                    deviceViewsIndex.put(device.getId(), new ArrayList<>());
+                    deviceIndex.put(d.getId(), device);
+                    // deviceViewsIndex.put(new DeviceGroupIdPair(device.getId(), ), new ArrayList<>());
 
                     for (Integer i : d.getDeviceGroups()) {
                         DeviceGroup deviceGroup = deviceGroupsIndex.get(i);
@@ -273,6 +280,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
                         deviceGroup.getDevices().add(device);
 
                         GroupViewFragment fragment = viewFragmentIndex.get(deviceGroup.getId());
+
                         if(fragment != null) {
                             fragment.getDeviceAdapter().notifyDataSetChanged();
                             fragment.updateDeviceNumber();
@@ -328,7 +336,7 @@ public class GroupSelectionActivity extends AppCompatActivity {
 
         List<Device> deviceList = new ArrayList<>();
         deviceList.add(device);
-        colorChangeDeviceAdapter = new DeviceAdapter(deviceList, this, false);
+        colorChangeDeviceAdapter = new DeviceAdapter(null, deviceList, this, false);
         recyclerView.setAdapter(colorChangeDeviceAdapter);
 
         // getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -374,7 +382,11 @@ public class GroupSelectionActivity extends AppCompatActivity {
         return deviceGroups;
     }
 
-    public Map<Integer, List<DeviceViewHolder>> getDeviceViewsIndex() {
+    public Map<Integer, Device> getDeviceIndex() {
+        return deviceIndex;
+    }
+
+    public Map<DeviceGroupIdPair, DeviceViewHolder> getDeviceViewsIndex() {
         return deviceViewsIndex;
     }
 

@@ -16,6 +16,7 @@ import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
 import com.pixled.pixledandroid.deviceGroup.editActivity.EditGroupActivity;
+import com.pixled.pixledandroid.utils.DeviceGroupIdPair;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
 import com.pixled.pixledserver.core.device.base.Device;
@@ -105,14 +106,10 @@ public class GroupViewFragment extends Fragment {
                         for (Device d : deviceGroup.getDevices()) {
                             for (DeviceGroup dg : d.getDeviceGroups()) {
                                 GroupViewFragment groupViewFragment = groupSelectionActivity.getViewFragmentIndex().get(dg.getId());
-                                // groupViewFragment.getDeviceAdapter().notifyDataSetChanged();
                                 if (groupViewFragment != null) {
                                     groupViewFragment.updateDeviceGroupState();
                                 }
-                            }
-
-                            for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(d.getId())) {
-                                deviceViewHolder.updateSwitch();
+                                groupSelectionActivity.getDeviceViewsIndex().get(new DeviceGroupIdPair(d.getId(), dg.getId())).updateSwitch();
                             }
                         }
                         groupSelectionActivity.getGroupPagerAdapter().notifyDataSetChanged();
@@ -130,15 +127,13 @@ public class GroupViewFragment extends Fragment {
 
         // Init button status
         updateDeviceGroupState();
-//        groupSwitch.setChecked(deviceGroup.getDeviceGroupState().getToggleState() == ToggleState.ON);
-//        groupSwitch.setSelected(deviceGroup.getDeviceGroupState().getToggleState() == ToggleState.ON);
 
         // The recycler view (aka a list) in which lights will be displayed
         RecyclerView recyclerView = rootView.findViewById(R.id.deviceList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        deviceAdapter = new DeviceAdapter(deviceGroup.getDevices(), groupSelectionActivity, true);
+        deviceAdapter = new DeviceAdapter(deviceGroup, deviceGroup.getDevices(), groupSelectionActivity, true);
         recyclerView.setAdapter(deviceAdapter);
 
         // Synchronize index

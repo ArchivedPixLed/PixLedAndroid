@@ -22,6 +22,7 @@ import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupService;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupViewFragment;
+import com.pixled.pixledandroid.utils.DeviceGroupIdPair;
 import com.pixled.pixledandroid.utils.ServerConfig;
 import com.pixled.pixledserver.core.ToggleState;
 import com.pixled.pixledserver.core.device.base.Device;
@@ -84,8 +85,11 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                             new Callback<DeviceDto>() {
                         @Override
                         public void onResponse(Call<DeviceDto> call, Response<DeviceDto> response) {
-                            for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
-                                deviceViewHolder.updateDeviceName();
+                            for (DeviceGroup dg : device.getDeviceGroups()) {
+                                DeviceViewHolder deviceViewHolder = groupSelectionActivity.getDeviceViewsIndex().get(new DeviceGroupIdPair(device.getId(), dg.getId()));
+                                if (deviceViewHolder != null) {
+                                    deviceViewHolder.updateDeviceName();
+                                }
                             }
                         }
 
@@ -177,8 +181,11 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                             groupViewFragment.updateDeviceGroupState();
                         }
 
-                        for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
-                            deviceViewHolder.updateSwitch();
+                        for (DeviceGroup dg : device.getDeviceGroups()) {
+                            DeviceViewHolder deviceViewHolder = groupSelectionActivity.getDeviceViewsIndex().get(new DeviceGroupIdPair(device.getId(), dg.getId()));
+                            if (deviceViewHolder != null) {
+                                deviceViewHolder.updateSwitch();
+                            }
                         }
                     }
 
@@ -219,8 +226,11 @@ public class DeviceViewHolder extends RecyclerView.ViewHolder {
                 // set seek bar color
                 if (fromUser) {
                     // Synchronize other views
-                    for (DeviceViewHolder deviceViewHolder : groupSelectionActivity.getDeviceViewsIndex().get(device.getId())) {
-                        deviceViewHolder.updateColorIntensity(progress);
+                    for (DeviceGroup dg : device.getDeviceGroups()) {
+                        DeviceViewHolder deviceViewHolder = groupSelectionActivity.getDeviceViewsIndex().get(new DeviceGroupIdPair(device.getId(), dg.getId()));
+                        if (deviceViewHolder != null) {
+                            deviceViewHolder.updateColorIntensity(progress);
+                        }
                     }
                 }
             }

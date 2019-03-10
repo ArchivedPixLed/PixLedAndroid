@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import com.pixled.pixledandroid.R;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupViewFragment;
+import com.pixled.pixledandroid.utils.DeviceGroupIdPair;
 import com.pixled.pixledserver.core.device.base.Device;
+import com.pixled.pixledserver.core.group.DeviceGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
     This class is used to generate views corresponding to each device in the RecyclerView, from a
     list of devices.
      */
-
+    private DeviceGroup deviceGroup;
     private List<Device> deviceList;
     private List<DeviceViewHolder> deviceViews;
 
@@ -27,7 +29,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
 
     private GroupSelectionActivity groupSelectionActivity;
 
-    public DeviceAdapter(List<Device> deviceList, GroupSelectionActivity groupSelectionActivity, boolean enableColorButton) {
+    public DeviceAdapter(DeviceGroup deviceGroup, List<Device> deviceList, GroupSelectionActivity groupSelectionActivity, boolean enableColorButton) {
+        this.deviceGroup = deviceGroup;
         this.deviceList = deviceList;
         deviceViews = new ArrayList<>();
         this.groupSelectionActivity = groupSelectionActivity;
@@ -51,7 +54,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
     @Override
     public void onBindViewHolder(DeviceViewHolder deviceViewHolder, int position) {
         Device device = deviceList.get(position);
-        groupSelectionActivity.getDeviceViewsIndex().get(device.getId()).add(deviceViewHolder);
+        // groupSelectionActivity.getDeviceViewsIndex().get(device.getId()).add(deviceViewHolder);
+        if (enableColorButton) {
+            // We are not in the colorChange view
+            groupSelectionActivity.getDeviceViewsIndex().put(new DeviceGroupIdPair(device.getId(), deviceGroup.getId()), deviceViewHolder);
+        }
         deviceViewHolder.bind(device);
     }
 

@@ -5,6 +5,8 @@ import android.util.Log;
 import com.pixled.pixledandroid.device.DeviceAdapter;
 import com.pixled.pixledandroid.device.DeviceViewHolder;
 import com.pixled.pixledandroid.deviceGroup.mainActivity.GroupSelectionActivity;
+import com.pixled.pixledandroid.utils.DeviceGroupIdPair;
+import com.pixled.pixledserver.core.group.DeviceGroup;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -31,13 +33,16 @@ public class MqttAndroidConnectionCallback implements MqttCallbackExtended {
         Integer id = Integer.valueOf(message.toString());
         Log.i("MQTT","Device " + id + " : " + topic);
         if (groupSelectionActivity != null) {
-            for (DeviceViewHolder deviceView : groupSelectionActivity.getDeviceViewsIndex().get(id)) {
-                if (topic.equals(MqttAndroidConnection.connected_topic)) {
-                    deviceView.getDevice().getDeviceState().setConnected(true);
-                } else if (topic.equals(MqttAndroidConnection.disconnected_topic)) {
-                    deviceView.getDevice().getDeviceState().setConnected(false);
+            for (DeviceGroup dg : groupSelectionActivity.getDeviceIndex().get(id).getDeviceGroups()) {
+                DeviceViewHolder deviceView = groupSelectionActivity.getDeviceViewsIndex().get(new DeviceGroupIdPair(id, dg.getId()));
+                if (deviceView != null) {
+                    if (topic.equals(MqttAndroidConnection.connected_topic)) {
+                        deviceView.getDevice().getDeviceState().setConnected(true);
+                    } else if (topic.equals(MqttAndroidConnection.disconnected_topic)) {
+                        deviceView.getDevice().getDeviceState().setConnected(false);
+                    }
+                    deviceView.updateConnectionStatus();
                 }
-                deviceView.updateConnectionStatus();
             }
         }
     }
